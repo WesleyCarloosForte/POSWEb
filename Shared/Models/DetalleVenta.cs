@@ -5,6 +5,7 @@
         public int Id { get; set; }
         public int VentaId { get; set; }
         public int ProductoId { get; set; }
+        public string Descripcion { get; set; }
         public string CodigoBarras { get; set; }
         public decimal PrecioVenta { get; set; }
         public decimal PrecioCompra { get; set; }

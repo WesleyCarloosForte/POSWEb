@@ -1,0 +1,121 @@
+﻿<EditForm Model="@this" OnValidSubmit="Checkout">
+    <div class="container">
+        <div class="product-list">
+            <h3>Productos Disponibles</h3>
+            <div class="form-row">
+                <div class="col-md-8">
+                    <div class="form-group">
+                        <label for="searchCode">Buscar por código de barras</label>
+                        <InputText id="searchCode" class="form-control" @bind-Value="searchCode" />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="quantity">Cantidad</label>
+                        <InputNumber id="quantity" class="form-control" @bind-Value="quantity" />
+                    </div>
+                </div>
+            </div>
+        <div class="cart">
+            <h3>Detalle de venta</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Descripción</th>
+                        <th>Cantidad</th>
+                        <th>Precio Venta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in CartItems)
+                    {
+                        <tr>
+                            <td>@item.Descripcion</td>
+                            <td>@item.Cantidad</td>
+                            <td>@item.PrecioVenta</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="checkout">
+            <h3>Total 20,0</h3>
+            <button class="btn btn-primary" type="submit">Finalizar</button>
+        </div>
+    </div>
+    </div>
+</EditForm>
+
+@code {
+    private List<ProductoViewDTO> Products { get; set; } = new List<ProductoViewDTO>();
+    private List<CreateDetalleVentaDTO> CartItems { get; set; } = new List<CreateDetalleVentaDTO>();
+    private string searchCode { get; set; } = "";
+    private int quantity { get; set; } = 0;
+
+    protected override void OnInitialized()
+    {
+        Products = new List<ProductoViewDTO>
+    {
+        new ProductoViewDTO { Id = 1, CategoriaId = 1, CodigoBarras = "001", StockActual = 100, Descripcion = "Producto 1", PrecioCompra = 10.0m, PrecioVenta = 20.0m, IvaPorcent = 10 },
+        new ProductoViewDTO { Id = 2, CategoriaId = 1, CodigoBarras = "002", StockActual = 200, Descripcion = "Producto 2", PrecioCompra = 15.0m, PrecioVenta = 25.0m, IvaPorcent = 10 }
+    };
+
+        CartItems = new List<CreateDetalleVentaDTO>
+    {
+        new CreateDetalleVentaDTO
+        {
+            Id = 1,
+            Descripcion = "Producto 1",
+            VentaId = 1,
+            ProductoId = 1,
+            CodigoBarras = "001",
+            PrecioVenta = 20.0m,
+            PrecioCompra = 10.0m,
+            Cantidad = 1,
+            Descuento = 0.0m,
+            TotalIVa = 2.0m,
+            IvaPorcent = 10,
+            TotalVenta = 22.0m,
+            TotalCompra = 10.0m
+        }
+    };
+    }
+
+
+
+    private void SearchKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            var product = Products.FirstOrDefault(p => p.CodigoBarras == searchCode);
+            if (product != null)
+            {
+                AddToCart(product);
+            }
+        }
+    }
+
+    private void AddToCartKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            var product = Products.FirstOrDefault(p => p.CodigoBarras == searchCode);
+            if (product != null && quantity > 0)
+            {
+                AddToCart(product, quantity);
+                quantity = 0;
+            }
+        }
+    }
+
+    private void AddToCart(ProductoViewDTO product, int quantity = 1)
+    {
+        // Lógica para agregar el producto al carrito de compras con la cantidad especificada
+        // Crea una instancia de la clase CartItem y agrega el ítem al carrito de compras (CartItems)
+    }
+
+    private void Checkout()
+    {
+        // Lógica para procesar el pago y finalizar la venta
+    }
+}

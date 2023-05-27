@@ -10,6 +10,8 @@
         public string Descripcion { get; set; }
         public decimal PrecioCompra { get; set; }
         public decimal PrecioVenta { get; set; }
+        //Indica el porcentaje de iva
+        public int IvaPorcent { get; set; }
         public string Categoria { get; set; }
     }
 }
