@@ -1,0 +1,28 @@
+﻿@page "/categoria/edit/{Id:int}"
+@inject HttpClient http
+
+<h3>Editar Categoria</h3>
+<CategoriaForm Id="Id" Save="@Save" Categoria="@Categoria">
+
+</CategoriaForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    CategoriaCreateDTO Categoria = new CategoriaCreateDTO();
+
+    async Task Save()
+    {
+        await http.PutAsJsonAsync($"{SharedProject.Api.url}/Categoria/{Id}", Categoria);
+    }
+
+    protected async override Task OnParametersSetAsync()
+    {
+        // Llama al método base para realizar las operaciones por defecto
+        await base.OnParametersSetAsync();
+
+        Categoria = await http.GetFromJsonAsync<CategoriaCreateDTO>($"{SharedProject.Api.url}/categoria/{Id}");
+
+    }
+}

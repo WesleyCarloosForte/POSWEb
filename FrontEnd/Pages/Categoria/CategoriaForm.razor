@@ -1,0 +1,30 @@
+﻿@page "/categoria/form"
+@inject HttpClient http
+@inject Microsoft.AspNetCore.Components.NavigationManager uriHelper
+
+    <EditForm Model="@Categoria" OnValidSubmit="@SaveForm">
+    <div class="form-field">
+        <label>Descripcion</label>
+        <div>
+            <InputText @bind-Value="@Categoria.Descripcion"></InputText>
+            <ValidationMessage For="@(() => Categoria.Descripcion)"/>
+        </div>
+    </div >
+    <button type="submit" class="btn btn-primary my-2">Guardar</button>
+    <DataAnnotationsValidator/>
+    </EditForm>
+@code {
+    [Parameter]
+    public EventCallback Save { get; set; }
+    [Parameter]
+    public int? Id { get; set; } = 0;
+    [Parameter]
+    public CategoriaCreateDTO Categoria { get; set; } = new CategoriaCreateDTO();
+
+    async Task SaveForm()
+    {
+        await this.Save.InvokeAsync();
+         uriHelper.NavigateTo("categoria/list");
+    }
+}
+

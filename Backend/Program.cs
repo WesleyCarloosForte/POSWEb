@@ -27,7 +27,7 @@ builder.Services.AddTransient<IRepository<Categoria>, Repository<Categoria>>();
 builder.Services.AddTransient<IRepository<Rol>, Repository<Rol>>();
 
 builder.Services.AddTransient<IClienteRepository, ClienteRepository>();
-
+builder.Services.AddTransient<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddTransient<IVentaRepository, VentaRepository>();
 builder.Services.AddTransient<IProveedorRepository, ProovedorRepository>();
 builder.Services.AddTransient<ICompraRepository, CompraRepository>();

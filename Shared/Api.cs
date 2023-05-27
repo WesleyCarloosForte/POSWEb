@@ -8,6 +8,6 @@ namespace SharedProject
 {
     public static class Api
     {
-        public static string url = "https://localhost:7046";
+        public static string url = "https://localhost:7046/api";
     }
 }

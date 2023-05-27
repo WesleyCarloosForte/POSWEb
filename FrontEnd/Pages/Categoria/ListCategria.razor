@@ -1,0 +1,102 @@
+﻿@page "/categoria/list"
+@inject HttpClient http
+@inject IJSRuntime js
+@using Microsoft.AspNetCore.Components.Forms
+
+    <h3>Categorias</h3>
+
+<div>
+<div class="input-group my-2 align-items-center">
+    <div class="input-group-prepend">
+        <span class="input-group-text" style="margin-right: 5px;"><i class="fas fa-search"></i></span>
+    </div>
+    <input type="text" class="form-control px-2" placeholder="Buscar categoría..." @bind="txt" />
+        <div class="input-group-append" style="margin-left: 5px;">
+        <button class="btn btn-primary ml-2" type="button" @onclick="(()=>Buscar(txt))">Buscar</button>
+    </div>
+</div>
+</div>
+
+@if (categorias == null)
+{
+    <text>Cargando...</text>
+}
+else if(categorias.Length==0)
+{
+    <text>No hay categoris en la base de datos!</text>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th hidden>Id</th>
+                <th>Descripción</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var categoria in categorias)
+            {
+                <tr>
+                    <td hidden>@categoria.Id</td>
+                    <td>@categoria.Descripcion</td>
+                    <td>
+                        <a class="btn btn-success" href="categoria/edit/@categoria.Id">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button class="btn btn-danger" @onclick="(()=>Delete(categoria.Id))">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+
+@code {
+    private Components.Modals.ConfirmationModal confirmationModal;
+    CategoriaViewDTO[] categorias { get; set; }
+    string txt="";
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategorias();
+    }
+    async Task LoadCategorias()
+    {
+        categorias = await http.GetFromJsonAsync<CategoriaViewDTO[]>($"{SharedProject.Api.url}/Categoria");
+    }
+    async Task Delete(int id)
+    {
+        var categoria = categorias.FirstOrDefault(x => x.Id == id);
+        if (await DeseasBorrar(categoria.Descripcion))
+        {
+            await http.DeleteAsync($"{SharedProject.Api.url}/Categoria/{id}");
+            await LoadCategorias();
+        }
+
+    }
+    async Task<Boolean> DeseasBorrar(string txt)
+    {
+        return await js.InvokeAsync<bool>("confirm", $"Deseas Eliminar el registro {txt}");   
+    }
+
+    async Task Buscar(string txt)
+    {
+        if (string.IsNullOrEmpty(txt) || string.IsNullOrWhiteSpace(txt))
+            await LoadCategorias();
+        else
+        {
+            var a = await http.GetFromJsonAsync<IEnumerable<CategoriaViewDTO>>($"{SharedProject.Api.url}/Categoria/filter/{txt}");
+            categorias = a.ToArray();
+        }
+      
+    }
+
+
+  
+
+
+}

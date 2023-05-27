@@ -1,0 +1,17 @@
+﻿@page "/categoria/create"
+@inject HttpClient http
+
+<h3>Registrar Categoria</h3>
+<CategoriaForm Id="0" Save="@Save" Categoria="@Categoria">
+
+</CategoriaForm>
+@code {
+
+
+    CategoriaCreateDTO Categoria = new CategoriaCreateDTO();
+
+    async Task Save()
+    {
+        await http.PostAsJsonAsync($"{SharedProject.Api.url}/Categoria", Categoria);
+    }
+}
