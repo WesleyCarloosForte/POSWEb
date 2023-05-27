@@ -1,0 +1,40 @@
+﻿@page "/categorias"
+@inject HttpClient httpClient
+@using SharedProject.DTOs
+
+<h3>Lista de Categorías</h3>
+
+@if (categorias != null)
+{
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Descripcion</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var categoria in categorias)
+            {
+                <tr>
+                    <td>@categoria.Id</td>
+                    <td>@categoria.Descripcion</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Cargando categorías...</p>
+}
+
+@code {
+    List<SharedProject.DTOs.CategoriaViewDTO> categorias;
+
+    protected override async Task OnInitializedAsync()
+    {
+        
+       categorias = await httpClient.GetFromJsonAsync<List<SharedProject.DTOs.CategoriaViewDTO>>($"{SharedProject.Api.url}/api/Categoria");
+    }
+}

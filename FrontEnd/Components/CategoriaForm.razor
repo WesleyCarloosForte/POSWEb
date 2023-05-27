@@ -1,0 +1,21 @@
+﻿@page "/Categoria/Registrar"
+@using SharedProject.DTOs;
+<FormGeneric T="CategoriaCreateDTO"
+                    FormData="@miObjeto"
+                    Save="@(async () => await HandleSave(miObjeto))"
+                    GotoNextPage="HandleGotoNextPage"
+                    Title="Registro de Categoría" />
+
+@code {
+    private CategoriaCreateDTO miObjeto = new CategoriaCreateDTO();
+
+    private async Task HandleSave(CategoriaCreateDTO data)
+    {
+        // Lógica para guardar el objeto 'data' (CategoriaCreateDTO)
+    }
+
+    private async Task HandleGotoNextPage()
+    {
+        // Lógica para ir a la siguiente página
+    }
+}

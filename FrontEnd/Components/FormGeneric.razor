@@ -1,0 +1,279 @@
+﻿@using System.Collections.Generic
+@using System.Linq
+@using System.ComponentModel.DataAnnotations;
+@using System.ComponentModel.DataAnnotations.Schema;
+@typeparam T
+
+@if (FormFields != null)
+{
+    <div class="container">
+        <h3>@Title</h3>
+        <EditForm Model="FormData" OnValidSubmit="Save">
+            @foreach (var field in FormFields)
+            {
+                <div class="form-group">
+                    <label for="@field.PropertyName">@field.DisplayName</label>
+                    @if (field.DataType == DataType.String)
+                    {
+                        <InputText id="@field.PropertyName" class="form-control" @bind-Value="@field.Value" @oninput="@(() => ValidateField(field.PropertyName))" @onblur="@(() => ValidateField(field.PropertyName))" />
+                    }
+                    else if (field.DataType == DataType.Number)
+                    {
+                        <InputNumber id="@field.PropertyName" class="form-control" @bind-Value="@field.Value" @oninput="@(() => ValidateField(field.PropertyName))" @onblur="@(() => ValidateField(field.PropertyName))" step="0.01" />
+                    }
+                    else if (field.DataType == DataType.Integer)
+                    {
+                        <InputText id="@field.PropertyName" class="form-control" @bind-Value="@field.Value" @oninput="@(() => ValidateField(field.PropertyName))" @onblur="@(() => ValidateField(field.PropertyName))" />
+                    }
+                    else if (field.DataType == DataType.Boolean)
+                    {
+                        //   <input id="@field.PropertyName" type="checkbox" @bind="@field.Value" @onchange="@(() => ValidateField(field.PropertyName))" />
+                    }
+                    else if (field.DataType == DataType.Email)
+                    {
+                        <InputText id="@field.PropertyName" class="form-control" @bind-Value="@field.Value" @oninput="@(() => ValidateField(field.PropertyName))" @onblur="@(() => ValidateField(field.PropertyName))" type="email" />
+                    }
+                    else if (field.DataType == DataType.PhoneNumber)
+                    {
+                        <InputText id="@field.PropertyName" class="form-control" @bind-Value="@field.Value" @oninput="@(() => ValidateField(field.PropertyName))" @onblur="@(() => ValidateField(field.PropertyName))" type="tel" />
+                    }
+                    else if (field.IsForeignKey == true)
+                    {
+                        <select id="@field.PropertyName" class="form-control" @bind="@field.Value" @oninput="@(() => ValidateForeignKeyField(field.PropertyName, field.Value))" @onblur="@(() => ValidateForeignKeyField(field.PropertyName, field.Value))">
+                            <option value="">--Select--</option>
+                            @foreach (var option in field.ForeignKeyOptions)
+                            {
+                                int foreignKeyValue = option.Value != null ? Convert.ToInt32(option.Value) : 0;
+                                <option value="@foreignKeyValue">@option.Text</option>
+                            }
+                        </select>
+                    }
+
+                    <ValidationMessage For="@(() => field.Value)" class="text-danger" />
+                </div>
+            }
+
+            <div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </EditForm>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public T FormData { get; set; }
+
+    [Parameter]
+    public EventCallback Save { get; set; }
+
+    [Parameter]
+    public EventCallback GotoNextPage { get; set; }
+
+    [Parameter]
+    public string Title { get; set; }
+
+    [Parameter]
+    public Dictionary<string, IEnumerable<object>> ForeignKeyData { get; set; }
+
+    private List<FormField> FormFields { get; set; }
+
+    protected override void OnInitialized()
+    {
+        FormFields = GetFormFields();
+    }
+
+    private List<FormField> GetFormFields()
+    {
+        var formFields = new List<FormField>();
+
+        var properties = typeof(T).GetProperties();
+        foreach (var property in properties)
+        {
+            var displayName = property.GetCustomAttributes(typeof(DisplayAttribute), true)
+                .OfType<DisplayAttribute>()
+                .FirstOrDefault()?.Name ?? property.Name;
+
+            var dataType = GetDataType(property.PropertyType);
+
+            var field = new FormField
+                {
+                    DisplayName = displayName,
+                    PropertyName = property.Name,
+                    Value = property.GetValue(FormData)?.ToString(),
+                    DataType = dataType,
+                    IsFieldValid = true
+                };
+
+            if (dataType == DataType.Number)
+            {
+                field.Value = Convert.ToDecimal(field.Value).ToString("N2");
+            }
+            else if (dataType == DataType.Boolean)
+            {
+                field.Value = field.Value?.ToLower();
+            }
+
+            if (property.GetCustomAttributes(typeof(ForeignKeyAttribute), true).Length > 0)
+            {
+                var foreignKeyName = property.Name.Substring(0, property.Name.Length - 2); // Remove "Id" suffix
+                if (ForeignKeyData != null && ForeignKeyData.ContainsKey(foreignKeyName))
+                {
+                    field.IsForeignKey = true;
+                    field.ForeignKeyOptions = ForeignKeyData[foreignKeyName]
+                        .Select(option => new ForeignKeyOption
+                            {
+                                Value = GetPropertyValue(option, "Id")?.ToString(),
+                                Text = GetPropertyValue(option, "Descripcion")?.ToString()
+                            })
+                        .ToList();
+                }
+            }
+
+            formFields.Add(field);
+        }
+
+        return formFields;
+    }
+
+    private DataType GetDataType(Type propertyType)
+    {
+        if (propertyType == typeof(string))
+        {
+            return DataType.String;
+        }
+        else if (propertyType == typeof(decimal) || propertyType == typeof(double))
+        {
+            return DataType.Number;
+        }
+        else if (propertyType == typeof(int))
+        {
+            return DataType.Integer;
+        }
+        else if (propertyType == typeof(bool))
+        {
+            return DataType.Boolean;
+        }
+        else if (propertyType == typeof(DateTime))
+        {
+            return DataType.DateTime;
+        }
+        else if (propertyType == typeof(TimeSpan))
+        {
+            return DataType.Time;
+        }
+        else if (propertyType == typeof(EmailAddressAttribute))
+        {
+            return DataType.Email;
+        }
+        else if (propertyType == typeof(PhoneAttribute))
+        {
+            return DataType.PhoneNumber;
+        }
+
+        return DataType.Unknown;
+    }
+
+
+    private void ValidateField(string propertyName)
+    {
+        var field = FormFields.FirstOrDefault(f => f.PropertyName == propertyName);
+        if (field != null)
+        {
+            var property = typeof(T).GetProperty(propertyName);
+            if (property != null)
+            {
+                var value = property.GetValue(FormData);
+                var validationContext = new ValidationContext(FormData) { MemberName = propertyName };
+                var validationResults = new List<ValidationResult>();
+
+                // Validate if the field is required and the value is null or empty string
+                var requiredAttribute = property.GetCustomAttributes(typeof(RequiredAttribute), true)
+                    .OfType<RequiredAttribute>()
+                    .FirstOrDefault();
+                if (requiredAttribute != null && (value == null || string.IsNullOrEmpty(value.ToString())))
+                {
+                    validationResults.Add(new ValidationResult(requiredAttribute.ErrorMessage ?? "The field is required.", new[] { propertyName }));
+                }
+                else
+                {
+                    Validator.TryValidateProperty(value, validationContext, validationResults);
+                }
+
+                field.IsFieldValid = validationResults.Count == 0;
+                StateHasChanged();
+            }
+        }
+    }
+
+
+    private void ValidateForeignKeyField(string propertyName, object selectedValue)
+    {
+        // Perform specific validation logic for foreign key fields
+        var field = FormFields.FirstOrDefault(f => f.PropertyName == propertyName);
+        if (field != null)
+        {
+            var property = typeof(T).GetProperty(propertyName);
+            if (property != null)
+            {
+                var validationContext = new ValidationContext(FormData) { MemberName = propertyName };
+                var validationResults = new List<ValidationResult>();
+
+                // Validate if the foreign key field is required and the selected value is null or empty string
+                var requiredAttribute = property.GetCustomAttributes(typeof(RequiredAttribute), true)
+                    .OfType<RequiredAttribute>()
+                    .FirstOrDefault();
+                if (requiredAttribute != null && (selectedValue == null || string.IsNullOrEmpty(selectedValue.ToString())))
+                {
+                    validationResults.Add(new ValidationResult(requiredAttribute.ErrorMessage ?? "The field is required.", new[] { propertyName }));
+                }
+                else
+                {
+                    Validator.TryValidateProperty(selectedValue, validationContext, validationResults);
+                }
+
+                field.IsFieldValid = validationResults.Count == 0;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private object GetPropertyValue(object obj, string propertyName)
+    {
+        var property = obj.GetType().GetProperty(propertyName);
+        if (property != null)
+        {
+            return property.GetValue(obj);
+        }
+        return null;
+    }
+    public class FormField
+    {
+        public string DisplayName { get; set; }
+        public string PropertyName { get; set; }
+        public string Value { get; set; }
+        public DataType DataType { get; set; }
+        public bool IsFieldValid { get; set; }
+        public bool IsForeignKey { get; set; }
+        public List<ForeignKeyOption> ForeignKeyOptions { get; set; }
+    }
+
+    public class ForeignKeyOption
+    {
+        public string Value { get; set; }
+        public string Text { get; set; }
+    }
+
+    public enum DataType
+    {
+        String,
+        Number,
+        Integer,
+        Boolean,
+        DateTime,
+        Time,
+        Email,
+        PhoneNumber,
+        Unknown
+    }
+}
