@@ -1,5 +1,5 @@
 ﻿using Backend.Data;
-using Backend.Interface;
+using SharedProject.Interface;
 using SharedProject.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -16,13 +16,22 @@ namespace Backend.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Cliente>> GetClientesWithData()
+        public async Task<IEnumerable<Cliente>> GetClientesWithData(Func<Cliente, bool> condition = null)
         {
-            var a= await _context.Clientes
+            if (condition == null)
+            {
+                return await _context.Clientes
+                    .Include(c => c.DatosGenerales)
+                    .ThenInclude(dg => dg.Documento)
+                    .ToListAsync();
+            }
+
+            else
+            return  _context.Clientes
                 .Include(c => c.DatosGenerales)
                 .ThenInclude(dg => dg.Documento)
-                .ToListAsync();
-            return a;
+                .Where(condition)
+                .ToList();
         }
 
         public async Task<Cliente> GetClientesWithData(int id)
@@ -32,6 +41,22 @@ namespace Backend.Repositories
                 .ThenInclude(dg => dg.Documento)
                  .Where(x => x.Id == id)
                  .FirstOrDefaultAsync();
+        }
+
+        public new void Update(Cliente entity)
+        {
+            var entityGeneral = new DatosGenerales();
+
+            entityGeneral = entity.DatosGenerales;
+            entityGeneral.Id = entity.DatosGeneralesId;
+
+            _context.Entry(entityGeneral).State = EntityState.Modified;
+            _context.Entry(entity).State = EntityState.Modified;
+             this.SaveChanges();
+             return;
+            
+            throw (new Exception("no fue posible encontrar los datos"));
+
         }
     }
 

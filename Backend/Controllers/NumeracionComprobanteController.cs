@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SharedProject.Models;
 using Backend.Repositories;
-using Backend.Interface;
+using SharedProject.Interface;
+using SharedProject.DTOs;
 
 namespace Backend.Controllers
 {
@@ -21,6 +22,25 @@ namespace Backend.Controllers
         {
             var numeraciones = _repository.GetAll();
             return Ok(numeraciones);
+        }
+
+        [HttpGet("filter/{txt}")]
+        public async Task<ActionResult<IEnumerable<NumeracionComprobante>>> GetAll(string txt)
+        {
+            try
+            {
+                var result = await _repository.FilterGet(txt);
+
+
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+
         }
 
         [HttpGet("{id}")]

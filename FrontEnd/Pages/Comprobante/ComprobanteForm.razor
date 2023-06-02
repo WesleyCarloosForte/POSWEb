@@ -1,0 +1,100 @@
+﻿@page "/comprobante/form"
+@using SharedProject.Models;
+@inject HttpClient http
+@inject Microsoft.AspNetCore.Components.NavigationManager uriHelper
+
+
+<EditForm Model="@comprobante" OnValidSubmit="@SaveForm">
+    <div class="form-field">
+        <label>Descripción</label>
+        <div>
+            <InputText class="form-control" @bind-Value="@comprobante.Descripcion"></InputText>
+            <ValidationMessage For="@(() => comprobante.Descripcion)" />
+        </div>
+    </div>
+
+    <div class="form-field">
+        <label>Número Actual</label>
+        <div>
+            <InputNumber class="form-control" @bind-Value="@comprobante.NumeroActual"></InputNumber>
+            <ValidationMessage For="@(() => comprobante.NumeroActual)" />
+        </div>
+    </div>
+
+    <div class="form-field">
+        <label>Número Final</label>
+        <div>
+            <InputNumber class="form-control" @bind-Value="@comprobante.NumeroFinal"></InputNumber>
+            <ValidationMessage For="@(() => comprobante.NumeroFinal)" />
+        </div>
+    </div>
+
+    <div class="form-field">
+        <label>Inicio de Vigencia</label>
+        <div>
+            <InputDate class="form-control" @bind-Value="@comprobante.InicioVigencia"></InputDate>
+            <ValidationMessage For="@(() => comprobante.InicioVigencia)" />
+        </div>
+    </div>
+
+    <div class="form-field">
+        <label>Fin de Vigencia</label>
+        <div>
+            <InputDate class="form-control" @bind-Value="@comprobante.FinVigencia"></InputDate>
+            <ValidationMessage For="@(() => comprobante.FinVigencia)" />
+        </div>
+    </div>
+
+    <div class="form-field">
+        <label>Valor Fiscal</label>
+        <div>
+            <InputCheckbox @bind-Value="@comprobante.ValorFiscal"></InputCheckbox>
+            <ValidationMessage For="@(() => comprobante.ValorFiscal)" />
+        </div>
+    </div>
+
+    <div class="form-field">
+        <label>Timbrado</label>
+        <div>
+            <InputText class="form-control" @bind-Value="@comprobante.Timbrado"></InputText>
+            <ValidationMessage For="@(() => comprobante.Timbrado)" />
+        </div>
+    </div>
+
+    <div class="form-field">
+        <label>Establecimiento</label>
+        <div>
+            <InputText class="form-control" @bind-Value="@comprobante.Establecimiento"></InputText>
+            <ValidationMessage For="@(() => comprobante.Establecimiento)" />
+        </div>
+    </div>
+
+    <div class="form-field">
+        <label>Punto de Expedición</label>
+        <div>
+            <InputText class="form-control" @bind-Value="@comprobante.PuntoExpedicion"></InputText>
+            <ValidationMessage For="@(() => comprobante.PuntoExpedicion)" />
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary my-2">Guardar</button>
+
+    <DataAnnotationsValidator />
+</EditForm>
+<FrontEnd.Components.Buttons.ButtonBack Goto="comprobante/list"></FrontEnd.Components.Buttons.ButtonBack>
+
+@code {
+    [Parameter]
+    public EventCallback Save { get; set; }
+    [Parameter]
+    public int? Id { get; set; } = 0;
+    [Parameter]
+    public NumeracionComprobante comprobante { get; set; } = new NumeracionComprobante();
+
+    async Task SaveForm()
+    {
+        await this.Save.InvokeAsync();
+         uriHelper.NavigateTo("comprobante/list");
+    }
+}
+

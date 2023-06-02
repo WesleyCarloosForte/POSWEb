@@ -1,7 +1,7 @@
 ﻿using SharedProject.DTOs;
 using SharedProject.Models;
 
-namespace Backend.Interface
+namespace SharedProject.Interface
 {
     public interface ICategoriaRepository : IRepository<Categoria>
     {

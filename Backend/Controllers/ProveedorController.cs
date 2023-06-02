@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using SharedProject.DTOs;
-using Backend.Interface;
+using SharedProject.Interface;
 using SharedProject.Models;
 using Backend.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +33,7 @@ namespace Backend.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ProveedorViewDTO>> GetCliente(int id)
         {
-            var cliente =  _clienteRepository.GetClientesWithData(id);
+            var cliente = await _clienteRepository.GetClientesWithData(id);
             if (cliente == null)
             {
                 return NotFound();
@@ -41,11 +41,36 @@ namespace Backend.Controllers
             var clienteDTO = _mapper.Map<ProveedorViewDTO>(cliente);
             return Ok(clienteDTO);
         }
+        [HttpGet("filter/{txt}")]
+        public async Task<ActionResult<IEnumerable<ProveedorViewDTO>>> GetFilterCliente(string txt)
+        {
+            var cliente = await _clienteRepository.GetClientesWithData(x=>x.DatosGenerales.NumeroDocumento.Contains(txt) || x.DatosGenerales.Nombre.ToLower().Contains(txt.ToLower()));
+            if (cliente == null )
+            {
+                return NotFound();
+            }
+            var clienteDTO = _mapper.Map<IEnumerable<ProveedorViewDTO>>(cliente);
+            return Ok(clienteDTO);
+        }
+
+        [HttpGet("edit/{id}")]
+        public async Task<ActionResult<ProveedorCreateDTO>> GetEditCliente(int id)
+        {
+            var cliente = await _clienteRepository.GetClientesWithData(id);
+            if (cliente == null)
+            {
+                return NotFound();
+            }
+            var clienteDTO = _mapper.Map<ProveedorCreateDTO>(cliente);
+            return Ok(clienteDTO);
+        }
+
 
         [HttpPost]
         public async Task<ActionResult<ProveedorViewDTO>> Create(ProveedorCreateDTO clienteCreateDTO)
         {
             var cliente = _mapper.Map<Proveedor>(clienteCreateDTO);
+            cliente.DatosGenerales.Estado= true;
              _clienteRepository.Add(cliente);
                 
             var clienteDTO = _mapper.Map<ProveedorCreateDTO>(cliente);
@@ -65,8 +90,11 @@ namespace Backend.Controllers
             {
                 return NotFound();
             }
+            var pvm = new Proveedor();
+            _mapper.Map(clienteUpdateDTO, pvm);
 
-            _mapper.Map(clienteUpdateDTO, cliente);
+            cliente.DatosGenerales = pvm.DatosGenerales;
+
              _clienteRepository.Update(cliente);
 
             return NoContent();

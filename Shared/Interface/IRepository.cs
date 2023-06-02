@@ -1,4 +1,4 @@
-﻿namespace Backend.Interface
+﻿namespace SharedProject.Interface
 {
 public interface IRepository<T> where T : class
 {

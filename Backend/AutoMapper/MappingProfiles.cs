@@ -14,6 +14,12 @@ namespace Backend.AutoMapper
             CreateMap<CategoriaCreateDTO, Categoria>();
             CreateMap<Categoria,CategoriaCreateDTO>();
 
+            CreateMap<Rol, RolViewDTO>();
+            CreateMap<RolViewDTO, Rol>();
+
+            CreateMap<CategoriaCreateDTO, Categoria>();
+            CreateMap<Categoria, CategoriaCreateDTO>();
+
             CreateMap<DetalleVenta, CreateDetalleVentaDTO>();
 
             CreateMap<CreateDetalleVentaDTO, DetalleVenta>()
@@ -65,9 +71,6 @@ namespace Backend.AutoMapper
 
 
 
-            CreateMap<Proveedor, ProductoViewDTO>(); // Mapeo de Usuario a UsuarioDTO
-            CreateMap<ProductoViewDTO, Proveedor>();
-
             CreateMap<ProveedorCreateDTO, Proveedor>()
                        .ForMember(dest => dest.Id, opt => opt.Ignore())
                        .ForMember(dest => dest.DatosGeneralesId, opt => opt.Ignore())
@@ -100,34 +103,33 @@ namespace Backend.AutoMapper
             CreateMap<Cliente, ClienteViewDTO>(); // Mapeo de Usuario a UsuarioDTO
             CreateMap<ClienteViewDTO, Cliente>();
 
-            CreateMap<ClienteCreateDTO, Cliente>()
-                       .ForMember(dest => dest.Id, opt => opt.Ignore())
-                       .ForMember(dest => dest.DatosGeneralesId, opt => opt.Ignore())
-
-                       .ForMember(dest => dest.DatosGenerales, opt => opt.MapFrom(src => new DatosGenerales
-                       {
-                           Nombre = src.Nombre,
-                           Direccion = src.Direccion,
-                           Telefono = src.Telefono,
-                           DocumentoId = src.DocumentoId,
-                           Email = src.Email,
-                           Estado = src.Estado,
-                           NumeroDocumento = src.NumeroDocumento
-
-                       }));
-
             CreateMap<Cliente, ClienteCreateDTO>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Nombre, opt => opt.MapFrom(src => src.DatosGenerales.Nombre))
                 .ForMember(dest => dest.Direccion, opt => opt.MapFrom(src => src.DatosGenerales.Direccion))
                 .ForMember(dest => dest.Telefono, opt => opt.MapFrom(src => src.DatosGenerales.Telefono))
-                .ForMember(dest => dest.DocumentoId, opt => opt.MapFrom(src => src.DatosGenerales.DocumentoId))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.DatosGenerales.Email))
+                .ForMember(dest => dest.NumeroDocumento, opt => opt.MapFrom(src => src.DatosGenerales.NumeroDocumento))
                 .ForMember(dest => dest.Estado, opt => opt.MapFrom(src => src.DatosGenerales.Estado))
-                .ForMember(dest => dest.NumeroDocumento, opt => opt.MapFrom(src => src.DatosGenerales.NumeroDocumento));
+                .ForMember(dest => dest.DocumentoId, opt => opt.MapFrom(src => src.DatosGenerales.DocumentoId));
 
+            CreateMap<ClienteCreateDTO, Cliente>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.DatosGeneralesId, opt => opt.Ignore())
+                .ForMember(dest => dest.DatosGenerales, opt => opt.MapFrom(src => new DatosGenerales
+                {
+                    Nombre = src.Nombre,
+                    Direccion = src.Direccion,
+                    Telefono = src.Telefono,
+                    Email = src.Email,
+                    NumeroDocumento = src.NumeroDocumento,
+                    Estado = src.Estado,
+                    DocumentoId = src.DocumentoId
+                }));
 
-            CreateMap<Proveedor, ProveedorViewDTO>();
-            CreateMap<ProveedorViewDTO, Proveedor>();
+            CreateMap<Proveedor, ProveedorViewDTO>().ForMember(dst=>dst.Compras,op=>op.Ignore());
+
+            CreateMap<ProveedorViewDTO, Proveedor>().ForMember(dst => dst.Compras, op => op.Ignore()); ;
 
 
 
@@ -136,6 +138,13 @@ namespace Backend.AutoMapper
 
             CreateMap<Usuario, UsuarioViewDTO>(); // Mapeo de Usuario a UsuarioDTO
             CreateMap<UsuarioViewDTO, Usuario>();
+
+
+            CreateMap<Cliente, ClienteViewDTO>()
+               .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+             .ForMember(dest => dest.DatosGeneralesId, opt => opt.MapFrom(src => src.DatosGeneralesId))
+                .ForMember(dest => dest.DatosGenerales, opt => opt.MapFrom(src => src.DatosGenerales));
+
 
             CreateMap<UsuarioCreateDTO, Usuario>()
                        .ForMember(dest => dest.Id, opt => opt.Ignore())

@@ -1,5 +1,5 @@
 using Backend.Data;
-using Backend.Interface;
+using SharedProject.Interface;
 using SharedProject.Models;
 using Backend.Repositories;
 using Microsoft.AspNetCore.Hosting;
@@ -21,11 +21,11 @@ builder.Services.AddDbContext<DataContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), new MySqlServerVersion(new Version(8, 0, 26))); // Reemplaza la versión de MySQL con tu versión específica
 });
 
+
 builder.Services.AddAutoMapper(typeof(Backend.AutoMapper.MappingProfiles));
 
-builder.Services.AddTransient<IRepository<Categoria>, Repository<Categoria>>();
-builder.Services.AddTransient<IRepository<Rol>, Repository<Rol>>();
 
+builder.Services.AddTransient<IRolRepository,RolRepository>();
 builder.Services.AddTransient<IClienteRepository, ClienteRepository>();
 builder.Services.AddTransient<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddTransient<IVentaRepository, VentaRepository>();
@@ -34,6 +34,7 @@ builder.Services.AddTransient<ICompraRepository, CompraRepository>();
 builder.Services.AddTransient<IProductoRepository, ProductoRepository>();
 builder.Services.AddTransient<INumeracionComprobanteRepository, NumeracionComprobanteRepository>();
 builder.Services.AddTransient<IDocumentoRepository, DocumentoRepository>();
+builder.Services.AddTransient<IRolRepository, RolRepository>();
 
 builder.Services.AddControllers().AddJsonOptions(x =>
     x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);

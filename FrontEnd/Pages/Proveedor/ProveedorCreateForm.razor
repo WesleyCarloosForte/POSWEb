@@ -1,0 +1,28 @@
+﻿@page "/Proveedor/create"
+@using SharedProject.Models;
+@inject HttpClient http
+@inject IJSRuntime runtime
+@inject SweetAlertService swl
+
+
+<h3>Registrar Proveedor</h3>
+<ProveedorForm Id="0" Save="@Save" Proveedor="@Proveedor">
+
+</ProveedorForm>
+@code {
+
+
+    ProveedorCreateDTO Proveedor = new ProveedorCreateDTO ();
+
+    async Task Save()
+    {
+        var result = await http.PostAsJsonAsync($"{SharedProject.Api.url}/Proveedor", Proveedor);
+        if (result.StatusCode == System.Net.HttpStatusCode.Created)
+        {
+            await new Utils.Functions(runtime, swl).ShowSaved();
+
+        }
+        else await new Utils.Functions(runtime, swl).ShowError("No fue posible realizar la operacion", "Error");
+
+    }
+}

@@ -1,0 +1,42 @@
+﻿@page "/Documento/form"
+@inject HttpClient http
+@inject Microsoft.AspNetCore.Components.NavigationManager uriHelper
+
+
+<EditForm Model="@Documento" OnValidSubmit="@SaveForm"> 
+    <div class="form-field">
+        <label>Descripción</label>
+        <div>
+            <InputText class="form-control" @bind-Value="@Documento.Descripcion"></InputText>
+            <ValidationMessage For="@(() => Documento.Descripcion)"/>
+        </div>
+    </div>
+    
+    <div class="form-field">
+        <label>Cantidad de Dígitos</label>
+        <div>
+            <InputNumber class="form-control" @bind-Value="@Documento.CantidadDigitos"></InputNumber>
+            <ValidationMessage For="@(() => Documento.CantidadDigitos)"/>
+        </div>
+    </div>
+    
+    <button type="submit" class="btn btn-primary my-2">Guardar</button>
+    
+    <DataAnnotationsValidator/>
+</EditForm>
+<FrontEnd.Components.Buttons.ButtonBack Goto="Documento/List"></FrontEnd.Components.Buttons.ButtonBack>
+@code {
+    [Parameter]
+    public EventCallback Save { get; set; }
+    [Parameter]
+    public int? Id { get; set; } = 0;
+    [Parameter]
+    public DocumentoViewDTO Documento { get; set; } = new DocumentoViewDTO();
+
+    async Task SaveForm()
+    {
+        await this.Save.InvokeAsync();
+        uriHelper.NavigateTo("Documento/list");
+    }
+}
+

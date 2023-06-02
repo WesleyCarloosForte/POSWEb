@@ -1,0 +1,102 @@
+﻿@page "/Proveedor/form"
+@using SharedProject.Models
+@using System.Collections.Generic
+@inject HttpClient http
+@inject NavigationManager uriHelper
+
+@if ( documentos != null)
+{
+
+    <EditForm Model="@Proveedor" OnValidSubmit="@SaveForm">
+ 
+        <div class="form-field">
+            <label>Nombre</label>
+            <div>
+                <InputText class="form-control" @bind-Value="@Proveedor.Nombre"></InputText>
+                <ValidationMessage For="@(() => Proveedor.Nombre)" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Dirección</label>
+            <div>
+                <InputText class="form-control" @bind-Value="@Proveedor.Direccion"></InputText>
+                <ValidationMessage For="@(() => Proveedor.Direccion)" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Teléfono</label>
+            <div>
+                <InputText class="form-control" @bind-Value="@Proveedor.Telefono"></InputText>
+                <ValidationMessage For="@(() => Proveedor.Telefono)" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Email</label>
+            <div>
+                <InputText class="form-control" @bind-Value="@Proveedor.Email"></InputText>
+                <ValidationMessage For="@(() => Proveedor.Email)" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Número de Documento</label>
+            <div>
+                <InputText class="form-control" @bind-Value="@Proveedor.NumeroDocumento"></InputText>
+                <ValidationMessage For="@(() => Proveedor.NumeroDocumento)" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Tipo de Documento</label>
+            <div>
+                <select class="form-control" @bind="@Proveedor.DocumentoId">
+                    @foreach (var documento in documentos)
+                    {
+                        <option value="@documento.Id">@documento.Descripcion</option>
+                    }
+                </select>
+                <ValidationMessage For="@(() => Proveedor.DocumentoId)" />
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary my-2">Guardar</button>
+
+        <DataAnnotationsValidator />
+
+    </EditForm>
+}
+else
+{
+    <p>Cargando datos...</p>
+}
+<FrontEnd.Components.Buttons.ButtonBack Goto="Proveedor/List"></FrontEnd.Components.Buttons.ButtonBack>
+
+@code {
+    [Parameter]
+    public EventCallback Save { get; set; }
+    [Parameter]
+    public int? Id { get; set; } = 0;
+    [Parameter]
+    public ProveedorCreateDTO Proveedor { get; set; } = new ProveedorCreateDTO();
+    List<DocumentoViewDTO> documentos;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+
+        documentos = new List<DocumentoViewDTO>();
+        documentos.Add(new DocumentoViewDTO { CantidadDigitos = 0, Descripcion = "---------", Estado = true, Id = 0 });
+
+        var resultDoc = await http.GetFromJsonAsync<List<DocumentoViewDTO>>($"{SharedProject.Api.url}/Documento");
+        documentos.AddRange(resultDoc);
+    }
+
+    private async Task SaveForm()
+    {
+        await Save.InvokeAsync();
+        uriHelper.NavigateTo("Proveedor/list");
+    }
+}

@@ -70,7 +70,7 @@ namespace Backend.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal?>("TotalCompra")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.HasKey("Id");
 
@@ -130,7 +130,7 @@ namespace Backend.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("Cantidad")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<string>("CodigoBarras")
                         .HasColumnType("longtext");
@@ -138,14 +138,17 @@ namespace Backend.Migrations
                     b.Property<int>("CompraId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Descripcion")
+                        .HasColumnType("longtext");
+
                     b.Property<decimal>("PrecioCompraUnitario")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<int>("ProductoId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalCompra")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.HasKey("Id");
 
@@ -163,28 +166,31 @@ namespace Backend.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("Cantidad")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<string>("CodigoBarras")
                         .HasColumnType("longtext");
 
+                    b.Property<string>("Descripcion")
+                        .HasColumnType("longtext");
+
                     b.Property<decimal>("Descuento")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<decimal>("PrecioCompra")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<decimal>("PrecioVenta")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<int>("ProductoId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalCompra")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<decimal>("TotalVenta")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<int>("VentaId")
                         .HasColumnType("int");
@@ -258,7 +264,7 @@ namespace Backend.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
 
-                    b.Property<bool?>("ValorFiscal")
+                    b.Property<bool>("ValorFiscal")
                         .HasColumnType("tinyint(1)");
 
                     b.HasKey("Id");
@@ -282,16 +288,16 @@ namespace Backend.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<decimal>("PrecioCompra")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<decimal>("PrecioVenta")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<decimal>("StockActual")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<decimal?>("StockMinimo")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.HasKey("Id");
 
@@ -323,7 +329,9 @@ namespace Backend.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Descripcion")
-                        .HasColumnType("longtext");
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
 
                     b.HasKey("Id");
 
@@ -388,7 +396,7 @@ namespace Backend.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<decimal?>("TotalCompra")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.HasKey("Id");
 

@@ -1,5 +1,5 @@
 ﻿using Backend.Data;
-using Backend.Interface;
+using SharedProject.Interface;
 using SharedProject.Models;
 using Microsoft.EntityFrameworkCore;
 

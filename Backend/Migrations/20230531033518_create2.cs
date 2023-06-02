@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Backend.Migrations
 {
     /// <inheritdoc />
-    public partial class create : Migration
+    public partial class create2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -59,7 +59,7 @@ namespace Backend.Migrations
                     NumeroFinal = table.Column<int>(type: "int", nullable: true),
                     InicioVigencia = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     FinVigencia = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    ValorFiscal = table.Column<bool>(type: "tinyint(1)", nullable: true),
+                    ValorFiscal = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Timbrado = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Establecimiento = table.Column<string>(type: "varchar(3)", maxLength: 3, nullable: true)
@@ -80,7 +80,7 @@ namespace Backend.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Descripcion = table.Column<string>(type: "longtext", nullable: true)
+                    Descripcion = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
@@ -113,7 +113,7 @@ namespace Backend.Migrations
                         column: x => x.CategoriaId,
                         principalTable: "Categorias",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -163,7 +163,7 @@ namespace Backend.Migrations
                         column: x => x.DatosGeneralesId,
                         principalTable: "DatosGenerales",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -183,7 +183,7 @@ namespace Backend.Migrations
                         column: x => x.DatosGeneralesId,
                         principalTable: "DatosGenerales",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -208,7 +208,7 @@ namespace Backend.Migrations
                         column: x => x.DatosGeneralesId,
                         principalTable: "DatosGenerales",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Usuarios_Roles_RolId",
                         column: x => x.RolId,
@@ -287,6 +287,8 @@ namespace Backend.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     VentaId = table.Column<int>(type: "int", nullable: false),
                     ProductoId = table.Column<int>(type: "int", nullable: false),
+                    Descripcion = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     CodigoBarras = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     PrecioVenta = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
@@ -322,6 +324,8 @@ namespace Backend.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     CompraId = table.Column<int>(type: "int", nullable: false),
                     ProductoId = table.Column<int>(type: "int", nullable: false),
+                    Descripcion = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     CodigoBarras = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     PrecioCompraUnitario = table.Column<decimal>(type: "decimal(65,30)", nullable: false),

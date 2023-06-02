@@ -1,4 +1,5 @@
 ﻿using SharedProject.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace  SharedProject.DTOs
 {
@@ -12,6 +13,7 @@ namespace  SharedProject.DTOs
         public string Timbrado { get; set; }
         public string Establecimiento { get; set; }
         public string PuntoExpedicion { get; set; }
+        [DisplayFormat(DataFormatString = "{0:N2}", ApplyFormatInEditMode = true)]
         public decimal? TotalCompra { get; set; }
         public bool? Estado { get; set; }
 

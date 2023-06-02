@@ -1,0 +1,116 @@
+﻿@page "/Proveedor/list"
+@inject HttpClient http
+@inject IJSRuntime js
+@using Microsoft.AspNetCore.Components.Forms
+@inject SweetAlertService swl;
+<h3>Proveedor</h3>
+
+<div class="input-group my-2 align-items-center">
+    <div class="input-group-prepend">
+        <span class="input-group-text" style="margin-right: 5px;"><i class="fas fa-search"></i></span>
+    </div>
+    <input type="text" class="form-contProveedor px-2" placeholder="Buscar" @bind="txt" />
+    <div class="input-group-append" style="margin-left: 5px;">
+        <button class="btn btn-primary ml-2" type="button" @onclick="(()=>Buscar(txt))">Buscar</button>
+    </div>
+</div>
+
+
+@if (Proveedores == null)
+{
+    <text>Cargando...</text>
+}
+else if (Proveedores.Length == 0)
+{
+    <text>No hay categoris en la base de datos!</text>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th hidden>Id</th>
+                <th>Nombre</th>
+                <th>Documento</th>
+                <th>Tipo de Documento</th>
+                
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var Proveedor in Proveedores)
+            {
+                <tr>
+                    <td hidden>@Proveedor.Id</td>
+                    <td>@Proveedor.DatosGenerales.Nombre</td>
+                     <td>@Proveedor.DatosGenerales.NumeroDocumento</td>
+                     <td>@Proveedor.DatosGenerales.Documento.Descripcion</td>
+                    <td>
+                        <a class="btn btn-success" href="Proveedor/edit/@Proveedor.Id">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button class="btn btn-danger" @onclick="(()=>Delete(Proveedor.Id))">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+<FrontEnd.Components.Buttons.ButtonNew Goto="Proveedor/Create"></FrontEnd.Components.Buttons.ButtonNew>
+@code {
+    private Components.Modals.ConfirmationModal confirmationModal;
+    ProveedorViewDTO[] Proveedores { get; set; }
+
+
+    string txt = "";
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProveedor();
+    }
+    async Task LoadProveedor()
+    {
+        Proveedores = await http.GetFromJsonAsync<ProveedorViewDTO[]>($"{SharedProject.Api.url}/Proveedor");
+    }
+    async Task Delete(int id)
+    {
+        var Proveedor = Proveedores.FirstOrDefault(x => x.Id == id);
+        if (await new Utils.Functions(js, swl).ShowConfirmation("Deseas eliminar el registro?", "Confirmar"))
+        {
+            var response = await http.DeleteAsync($"{SharedProject.Api.url}/Proveedor/{id}");
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                await LoadProveedor();
+            else
+                await new Utils.Functions(js, swl).ShowError("No fue posible eliminar el registro", "Error");
+
+        }
+
+    }
+
+    private async void SearchKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await Buscar(txt);
+        }
+    }
+
+    async Task Buscar(string txt)
+    {
+        if (string.IsNullOrEmpty(txt) || string.IsNullOrWhiteSpace(txt))
+            await LoadProveedor();
+        else
+        {
+            var a = await http.GetFromJsonAsync<IEnumerable<ProveedorViewDTO>>($"{SharedProject.Api.url}/Proveedor/filter/{txt}");
+            Proveedores = a.ToArray();
+        }
+
+    }
+
+
+
+
+
+}

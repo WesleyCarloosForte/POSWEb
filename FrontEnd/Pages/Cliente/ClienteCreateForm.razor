@@ -1,0 +1,28 @@
+﻿@page "/Cliente/create"
+@using SharedProject.Models;
+@inject HttpClient http
+@inject IJSRuntime runtime
+@inject SweetAlertService swl
+
+
+<h3>Registrar Cliente</h3>
+<ClienteForm Id="0" Save="@Save" Cliente="@Cliente">
+
+</ClienteForm>
+@code {
+
+
+    ClienteCreateDTO Cliente = new ClienteCreateDTO ();
+
+    async Task Save()
+    {
+        var result = await http.PostAsJsonAsync($"{SharedProject.Api.url}/Clientes", Cliente);
+        if (result.StatusCode == System.Net.HttpStatusCode.Created)
+        {
+            await new Utils.Functions(runtime, swl).ShowSaved();
+
+        }
+        else await new Utils.Functions(runtime, swl).ShowError("No fue posible realizar la operacion", "Error");
+
+    }
+}

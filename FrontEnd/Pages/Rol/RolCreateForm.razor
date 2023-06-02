@@ -1,0 +1,27 @@
+﻿@page "/Rol/create"
+@inject HttpClient http
+@inject IJSRuntime runtime
+@inject SweetAlertService swl
+
+
+<h3>Registrar Rol</h3>
+<RolForm Id="0" Save="@Save" Rol="@Rol">
+
+</RolForm>
+@code {
+
+
+    RolViewDTO Rol = new RolViewDTO();
+
+    async Task Save()
+    {
+       var result= await http.PostAsJsonAsync($"{SharedProject.Api.url}/Rol", Rol);
+        if (result.StatusCode == System.Net.HttpStatusCode.Created)
+        {
+            await new Utils.Functions(runtime, swl).ShowSaved();
+
+        }
+        else await new Utils.Functions(runtime, swl).ShowError("No fue posible realizar la operacion", "Error");
+
+    }
+}

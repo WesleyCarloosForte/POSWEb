@@ -1,5 +1,5 @@
 ﻿using SharedProject.DTOs;
-using Backend.Interface;
+using SharedProject.Interface;
 using SharedProject.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,16 +21,55 @@ namespace Backend.Controllers
 
 
         [HttpGet]
-        public ActionResult<IEnumerable<Producto>> Get()
+        public async Task<ActionResult<IEnumerable<Producto>>> Get()
         {
-            var productos = _productoRepository.GetProductosWithData();
+            var productos = await _productoRepository.GetProductosWithDataFilter();
             return Ok(productos);
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Producto> Get(int id)
+        public async Task<ActionResult<Producto>> Get(int id)
         {
-            var producto = _productoRepository.GetProductosWithData(id);
+            var producto = await _productoRepository.GetProductoWithData(id);
+
+            if (producto == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(producto);
+        }
+
+        [HttpGet("barCode/{barCode}")]
+        public async Task<ActionResult<Producto>> GetbarCode(string barCode)
+        {
+            var producto = await _productoRepository.GetProductoWithDataInStock(x=>x.CodigoBarras== barCode);
+
+            if (producto == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(producto);
+        }
+
+        [HttpGet("filter/{txt}")]
+        public async Task<ActionResult<IEnumerable<Producto>>> GetFilter(string txt)
+        {
+            var producto = await _productoRepository.GetProductosWithDataFilter(x => x.Descripcion.ToLower().Contains(txt.ToLower()) |x.CodigoBarras.Contains(txt));
+
+            if (producto == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(producto);
+        }
+
+        [HttpGet("edit/{id}")]
+        public async Task< ActionResult<Producto>> GetEdit(int id)
+        {
+            var producto = await _productoRepository.GetProductoWithData(id);
 
             if (producto == null)
             {
@@ -70,25 +109,22 @@ namespace Backend.Controllers
             {
                 return BadRequest();
             }
-            var p = new Producto
-            {
-                Id=producto.Id,
-                CategoriaId = producto.CategoriaId,
-                CodigoBarras = producto.CodigoBarras,
-                Descripcion = producto.Descripcion,
-                PrecioCompra = producto.PrecioCompra,
-                PrecioVenta = producto.PrecioVenta,
-                StockActual = producto.StockActual,
-                StockMinimo = producto.StockMinimo
-            };
+
 
             var existingProducto = _productoRepository.GetById(id);
             if (existingProducto == null)
             {
                 return NotFound();
             }
+            existingProducto.CategoriaId = producto.CategoriaId;
+            existingProducto.CodigoBarras = producto.CodigoBarras;
+            existingProducto.Descripcion = producto.Descripcion;
+            existingProducto.PrecioCompra = producto.PrecioCompra;
+            existingProducto.PrecioVenta = producto.PrecioVenta;
+            existingProducto.StockActual = producto.StockActual;
+            existingProducto.StockMinimo = producto.StockMinimo;
 
-            _productoRepository.Update(p);
+            _productoRepository.Update(existingProducto);
             return NoContent();
         }
 

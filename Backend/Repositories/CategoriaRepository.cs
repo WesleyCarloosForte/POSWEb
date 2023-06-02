@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Backend.Data;
-using Backend.Interface;
+using SharedProject.Interface;
 using Microsoft.EntityFrameworkCore;
 using SharedProject.DTOs;
 using SharedProject.Models;

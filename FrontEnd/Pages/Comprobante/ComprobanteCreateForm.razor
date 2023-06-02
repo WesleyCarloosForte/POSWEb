@@ -1,0 +1,28 @@
+﻿@page "/comprobante/create"
+@using SharedProject.Models;
+@inject HttpClient http
+@inject IJSRuntime runtime
+@inject SweetAlertService swl
+
+
+<h3>Registrar comprobante</h3>
+<ComprobanteForm Id="0" Save="@Save" comprobante="@comprobante">
+
+</ComprobanteForm>
+@code {
+
+
+    NumeracionComprobante comprobante = new NumeracionComprobante();
+
+    async Task Save()
+    {
+        var result = await http.PostAsJsonAsync($"{SharedProject.Api.url}/NumeracionComprobante", comprobante);
+        if (result.StatusCode == System.Net.HttpStatusCode.Created)
+        {
+            await new Utils.Functions(runtime, swl).ShowSaved();
+
+        }
+        else await new Utils.Functions(runtime, swl).ShowError("No fue posible realizar la operacion", "Error");
+
+    }
+}

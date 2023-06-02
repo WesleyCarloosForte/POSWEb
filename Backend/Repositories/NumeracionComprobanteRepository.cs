@@ -1,15 +1,18 @@
 ﻿using Backend.Data;
-using Backend.Interface;
+using SharedProject.Interface;
 using SharedProject.Models;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
 namespace Backend.Repositories
 {
     public class NumeracionComprobanteRepository : Repository<NumeracionComprobante>,INumeracionComprobanteRepository
     {
+        private IMapper _mapper;
         private readonly DataContext _context;
-        public NumeracionComprobanteRepository(DataContext context) : base(context)
+        public NumeracionComprobanteRepository(DataContext context,IMapper mapper) : base(context)
         {
+            _mapper = mapper;
             _context= context;
         }
         public async Task<IEnumerable<NumeracionComprobante>> GetValid()
@@ -26,6 +29,11 @@ namespace Backend.Repositories
             }
             _context.Entry(value).State = EntityState.Modified;
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<NumeracionComprobante>> FilterGet(string txt)
+        {
+            return await _context.NumeracionComprobantes.Where(x=>x.Descripcion.Contains(txt)).ToListAsync();
         }
     }
 }

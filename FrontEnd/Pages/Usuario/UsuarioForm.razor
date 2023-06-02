@@ -1,0 +1,136 @@
+﻿@page "/usuario/form"
+@using SharedProject.Models
+@using System.Collections.Generic
+@inject HttpClient http
+@inject NavigationManager uriHelper
+
+@if (roles != null && documentos != null)
+{
+    <h3>Crear/Editar Usuario</h3>
+
+    <EditForm Model="@Usuario" OnValidSubmit="@SaveForm">
+        <div class="form-field">
+            <label>Login</label>
+            <div>
+                <InputText class="form-control" @bind-Value="@Usuario.Login"></InputText>
+                <ValidationMessage For="@(() => Usuario.Login)" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Password</label>
+            <div>
+                <InputText class="form-control"  @bind-Value="@Usuario.Password"></InputText>
+                <ValidationMessage For="@(() => Usuario.Password)" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Rol</label>
+            <div>
+                <select class="form-control" @bind="@Usuario.RolId">
+                    @foreach (var rol in roles)
+                    {
+                        <option value="@rol.Id">@rol.Descripcion</option>
+                    }
+                </select>
+                <ValidationMessage For="@(() => Usuario.RolId)" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Nombre</label>
+            <div>
+                <InputText class="form-control" @bind-Value="@Usuario.Nombre"></InputText>
+                <ValidationMessage For="@(() => Usuario.Nombre)" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Dirección</label>
+            <div>
+                <InputText class="form-control" @bind-Value="@Usuario.Direccion"></InputText>
+                <ValidationMessage For="@(() => Usuario.Direccion)" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Teléfono</label>
+            <div>
+                <InputText class="form-control" @bind-Value="@Usuario.Telefono"></InputText>
+                <ValidationMessage For="@(() => Usuario.Telefono)" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Email</label>
+            <div>
+                <InputText class="form-control" @bind-Value="@Usuario.Email"></InputText>
+                <ValidationMessage For="@(() => Usuario.Email)" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Número de Documento</label>
+            <div>
+                <InputText class="form-control" @bind-Value="@Usuario.NumeroDocumento"></InputText>
+                <ValidationMessage For="@(() => Usuario.NumeroDocumento)" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Tipo de Documento</label>
+            <div>
+                <select class="form-control" @bind="@Usuario.DocumentoId">
+                    @foreach (var documento in documentos)
+                    {
+                        <option value="@documento.Id">@documento.Descripcion</option>
+                    }
+                </select>
+                <ValidationMessage For="@(() => Usuario.DocumentoId)" />
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary my-2">Guardar</button>
+
+        <DataAnnotationsValidator />
+
+    </EditForm>
+}
+else
+{
+    <p>Cargando datos...</p>
+}
+<FrontEnd.Components.Buttons.ButtonBack Goto="Usuario/List"></FrontEnd.Components.Buttons.ButtonBack>
+@code {
+    [Parameter]
+    public EventCallback Save { get; set; }
+    [Parameter]
+    public int? Id { get; set; } = 0;
+    [Parameter]
+    public UsuarioCreateDTO Usuario { get; set; } = new UsuarioCreateDTO();
+    List<RolViewDTO> roles;
+    List<DocumentoViewDTO> documentos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        roles = new List<RolViewDTO> ();
+        roles.Add(new RolViewDTO { Descripcion = "----------", Id = 0 });
+
+        var result = await http.GetFromJsonAsync<List<RolViewDTO>>($"{SharedProject.Api.url}/Rol");
+
+        roles.AddRange(result);
+
+        documentos = new List<DocumentoViewDTO>();
+        documentos.Add(new DocumentoViewDTO { CantidadDigitos = 0, Descripcion = "---------", Estado = true, Id = 0 });
+
+        var resultDoc = await http.GetFromJsonAsync<List<DocumentoViewDTO>>($"{SharedProject.Api.url}/Documento");
+        documentos.AddRange(resultDoc);
+    }
+
+    private async Task SaveForm()
+    {
+        await Save.InvokeAsync();
+        uriHelper.NavigateTo("Usuario/list");
+    }
+}

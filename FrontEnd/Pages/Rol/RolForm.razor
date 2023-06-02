@@ -1,0 +1,32 @@
+﻿@page "/Rol/form"
+@inject HttpClient http
+@inject Microsoft.AspNetCore.Components.NavigationManager uriHelper
+
+
+    <EditForm Model="@Rol" OnValidSubmit="@SaveForm"> 
+    <div class="form-field">
+        <label>Descripcion</label>
+        <div>
+            <InputText class="form-control" @bind-Value="@Rol.Descripcion"></InputText>
+            <ValidationMessage For="@(() => Rol.Descripcion)"/>
+        </div>
+    </div >
+    <button type="submit" class="btn btn-primary my-2">Guardar</button>
+    <DataAnnotationsValidator/>
+    </EditForm>
+<FrontEnd.Components.Buttons.ButtonBack Goto="Rol/List"></FrontEnd.Components.Buttons.ButtonBack>
+@code {
+    [Parameter]
+    public EventCallback Save { get; set; }
+    [Parameter]
+    public int? Id { get; set; } = 0;
+    [Parameter]
+    public RolViewDTO Rol { get; set; } = new RolViewDTO();
+
+    async Task SaveForm()
+    {
+        await this.Save.InvokeAsync();
+        uriHelper.NavigateTo("Rol/list");
+    }
+}
+

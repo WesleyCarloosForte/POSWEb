@@ -7,6 +7,7 @@
     </div>
 </div>
 
+
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
     <nav class="flex-column">
         <div class="nav-item px-3">
@@ -14,24 +15,57 @@
                 <span class="oi oi-home" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-         <div class="nav-item px-3" @onclick="ToggleCategoria">
-             <NavLink>
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Categorías
-             </NavLink>
-    </div>
-        @if (showCategoriaOptions)
-        {
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="categoria/list">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Listado
-                </NavLink>
-            </div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="categoria/create">
-                    <span class="oi oi-plus" aria-hidden="true"></span> Registrar
-                </NavLink>
-            </div>
-        }
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="categoria/list">
+                <span class="fas fa-list" aria-hidden="true"></span>&nbsp;Categorías
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="Rol/list">
+                <span class="fas fa-users" aria-hidden="true"></span>&nbsp;Roles
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="documento/list">
+                <span class="fas fa-file-alt" aria-hidden="true"></span>&nbsp;Documentos
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="comprobante/list">
+                <span class="fas fa-receipt" aria-hidden="true"></span>&nbsp;Comprobantes
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="Cliente/list">
+                <span class="fas fa-user" aria-hidden="true"></span>&nbsp;Clientes
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="Usuario/list">
+                <span class="fas fa-user-circle" aria-hidden="true"></span>&nbsp;Usuarios
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="Proveedor/list">
+                <span class="fas fa-truck" aria-hidden="true"></span>&nbsp;Proveedores
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="Producto/list">
+                <span class="fas fa-box-open" aria-hidden="true"></span>&nbsp;Productos
+            </NavLink>
+        </div>
+
+
+
 
     </nav>
 </div>
@@ -45,10 +79,5 @@
     {
         collapseNavMenu = !collapseNavMenu;
     }
-    private bool showCategoriaOptions = false;
 
-    private void ToggleCategoria()
-    {
-        showCategoriaOptions = !showCategoriaOptions;
-    }
 }

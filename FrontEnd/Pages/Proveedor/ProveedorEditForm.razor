@@ -1,0 +1,40 @@
+﻿@page "/Proveedor/edit/{Id:int}"
+@inject HttpClient http
+@inject IJSRuntime runtime;
+@inject SweetAlertService swl;
+
+<h3>Editar Proveedor</h3>
+<ProveedorForm Id="Id" Save="@Save" Proveedor="@Proveedor">
+
+</ProveedorForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    ProveedorCreateDTO Proveedor = new ProveedorCreateDTO();
+
+    async Task Save()
+    {
+        var result = await http.PutAsJsonAsync($"{SharedProject.Api.url}/Proveedor/{Id}", Proveedor);
+        if (result.StatusCode == System.Net.HttpStatusCode.NoContent)
+        {
+          await  new Utils.Functions(runtime, swl).ShowSaved();    
+
+        }
+        else await new Utils.Functions(runtime, swl).ShowError("No fue posible realizar la operacion","Error");
+
+
+
+    }
+
+    protected async override Task OnParametersSetAsync()
+    {
+        // Llama al método base para realizar las operaciones por defecto
+        await base.OnParametersSetAsync();
+
+        Proveedor = await http.GetFromJsonAsync<ProveedorCreateDTO>($"{SharedProject.Api.url}/Proveedor/edit/{Id}");
+
+
+    }
+}

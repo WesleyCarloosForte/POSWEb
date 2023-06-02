@@ -20,7 +20,6 @@ namespace  SharedProject.DTOs
         public string Direccion { get; set; }
 
         [Required(ErrorMessage = "El campo Teléfono es requerido.")]
-        [RegularExpression(@"^\d{9}$", ErrorMessage = "El campo Teléfono debe tener 9 dígitos.")]
         public string Telefono { get; set; }
 
         [Required(ErrorMessage = "El campo Email es requerido.")]

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SharedProject.Models;
 using Backend.Repositories;
-using Backend.Interface;
+using SharedProject.Interface;
 using SharedProject.DTOs;
 using AutoMapper;
 

@@ -1,6 +1,6 @@
-﻿using Backend.Interface;
+﻿using SharedProject.Interface;
 using SharedProject.Models;
-namespace Backend.Interface
+namespace SharedProject.Interface
 {
     public interface IVentaRepository : IRepository<Venta>
     {

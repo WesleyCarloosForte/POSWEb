@@ -10,12 +10,12 @@ namespace Backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UsuariosController : ControllerBase
+    public class UsuarioController : ControllerBase
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
 
-        public UsuariosController(DataContext context, IMapper mapper)
+        public UsuarioController(DataContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
@@ -45,10 +45,54 @@ namespace Backend.Controllers
             return Ok(usuarioDto);
         }
 
+        [HttpGet("filter/{txt}")]
+        public async Task<ActionResult<IEnumerable<UsuarioViewDTO>>> GetAll(string txt)
+        {
+            try
+            {
+                var usuario = _context.Usuarios.Include(u => u.Rol).Include(dt => dt.DatosGenerales).ThenInclude(dt => dt.Documento)
+                    .Where(u=>u.DatosGenerales.Nombre.Contains(txt) 
+                    || u.Login.Contains(txt) 
+                    || u.DatosGenerales.NumeroDocumento.Contains(txt) 
+                    || u.Rol.Descripcion.Contains(txt)).ToArray();
+
+                if (usuario == null)
+                {
+                    return NotFound();
+                }
+
+                var usuarioDto = _mapper.Map<IEnumerable<UsuarioViewDTO>>(usuario);
+
+                return Ok(usuarioDto);
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+
+        }
+
+        [HttpGet("edit/{id}")]
+        public ActionResult<UsuarioCreateDTO> GetEditUsuario(int id)
+        {
+            var usuario = _context.Usuarios.Include(u => u.Rol).Include(dt => dt.DatosGenerales).ThenInclude(dt => dt.Documento).FirstOrDefault(u => u.Id == id);
+
+            if (usuario == null)
+            {
+                return NotFound();
+            }
+
+            var usuarioDto = _mapper.Map<UsuarioCreateDTO>(usuario);
+
+            return Ok(usuarioDto);
+        }
+
         [HttpPost]
         public ActionResult<UsuarioDTO> CreateUsuario(UsuarioCreateDTO usuarioDto)
         {
             var usuario = _mapper.Map<Usuario>(usuarioDto);
+            usuario.DatosGenerales.Estado = true;
 
             _context.Usuarios.Add(usuario);
             _context.SaveChanges();
@@ -59,18 +103,52 @@ namespace Backend.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateUsuario(int id, UsuarioCreateDTO usuarioDto)
+        public async Task< IActionResult> UpdateUsuario(int id, UsuarioCreateDTO usuarioDto)
         {
             if (id != usuarioDto.Id)
             {
                 return BadRequest();
             }
 
-            var usuario = _mapper.Map<Usuario>(usuarioDto);
-            _context.Entry(usuario).State = EntityState.Modified;
-            _context.SaveChanges();
+           // var datosGeneralId = await _context.DatosGenerales.FirstOrDefaultAsync(x => x.NumeroDocumento == usuarioDto.NumeroDocumento);
 
-            return NoContent();
+            var usuario = _mapper.Map<Usuario>(usuarioDto);
+            usuario.Id = usuarioDto.Id;
+            usuario.RolId= usuarioDto.RolId;
+            usuario.DatosGenerales.DocumentoId = usuarioDto.DocumentoId;
+            // usuario.DatosGenerales.Id= datosGeneralId.Id;
+            //usuario.DatosGeneralesId = datosGeneralId.Id;
+
+            var usr = _context.Usuarios.Find(id);
+
+            usuario.DatosGeneralesId= usr.Id;
+
+            if(usr != null)
+            {
+                
+                usr.RolId = usuario.RolId;
+                usr.Login= usuario.Login;
+                usr.Password= usuario.Password;
+                
+                var entityGeneral = _context.DatosGenerales.Find(usr.DatosGeneralesId);
+                
+                    entityGeneral.Nombre = usuario.DatosGenerales.Nombre;
+                    entityGeneral.Telefono = usuario.DatosGenerales.Telefono;
+                    entityGeneral.Estado = usuario.DatosGenerales.Estado;
+                    entityGeneral.NumeroDocumento = usuario.DatosGenerales.NumeroDocumento;
+                    entityGeneral.Direccion = usuario.DatosGenerales.Direccion;
+                    entityGeneral.Email = usuario.DatosGenerales.Email;
+                    entityGeneral.DocumentoId = usuario.DatosGenerales.DocumentoId;
+
+                _context.Entry(entityGeneral).State = EntityState.Modified;
+                _context.Entry(usr).State = EntityState.Modified;
+                _context.SaveChanges();
+
+                return NoContent();
+            }
+            return NotFound();
+
+
         }
 
         [HttpDelete("{id}")]

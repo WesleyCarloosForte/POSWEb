@@ -1,0 +1,106 @@
+﻿@page "/producto/form"
+@using SharedProject.Models
+@using System.Collections.Generic
+@inject HttpClient http
+@inject NavigationManager uriHelper
+
+@if (categorias != null)
+{
+    <h3>Crear/Editar Producto</h3>
+
+    <EditForm Model="@Producto" OnValidSubmit="@SaveForm">
+        <div class="form-field">
+            <label>Categoría</label>
+            <div>
+                <select class="form-control" @bind="@Producto.CategoriaId">
+                    @foreach (var categoria in categorias)
+                    {
+                        <option value="@categoria.Id">@categoria.Descripcion</option>
+                    }
+                </select>
+                <ValidationMessage For="@(() => Producto.CategoriaId)" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Código de Barras</label>
+            <div>
+                <InputText class="form-control" @bind-Value="@Producto.CodigoBarras"></InputText>
+                <ValidationMessage For="@(() => Producto.CodigoBarras)" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Stock Actual</label>
+            <div>
+                <InputNumber class="form-control" @bind-Value="@Producto.StockActual"></InputNumber>
+                <ValidationMessage For="@(() => Producto.StockActual)" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Stock Mínimo</label>
+            <div>
+                <InputNumber class="form-control" @bind-Value="@Producto.StockMinimo"></InputNumber>
+                <ValidationMessage For="@(() => Producto.StockMinimo)" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Descripción</label>
+            <div>
+                <InputText class="form-control" @bind-Value="@Producto.Descripcion"></InputText>
+                <ValidationMessage For="@(() => Producto.Descripcion)" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Precio de Compra</label>
+            <div>
+                <InputNumber class="form-control" @bind-Value="@Producto.PrecioCompra"></InputNumber>
+                <ValidationMessage For="@(() => Producto.PrecioCompra)" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Precio de Venta</label>
+            <div>
+                <InputNumber class="form-control" @bind-Value="@Producto.PrecioVenta"></InputNumber>
+                <ValidationMessage For="@(() => Producto.PrecioVenta)" />
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary my-2">Guardar</button>
+
+        <DataAnnotationsValidator />
+    </EditForm>
+}
+else
+{
+    <p>Cargando datos...</p>
+}
+<FrontEnd.Components.Buttons.ButtonBack Goto="Producto/List"></FrontEnd.Components.Buttons.ButtonBack>
+@code {
+    [Parameter]
+    public EventCallback Save { get; set; }
+    [Parameter]
+    public int? Id { get; set; } = 0;
+    [Parameter]
+    public ProductoCreateDTO Producto { get; set; } = new ProductoCreateDTO();
+    List<CategoriaViewDTO> categorias;
+
+    protected override async Task OnInitializedAsync()
+    {
+        categorias = new List<CategoriaViewDTO>();
+        categorias.Add(new CategoriaViewDTO { Descripcion = "----------", Id = 0 });
+
+        var result = await http.GetFromJsonAsync<List<CategoriaViewDTO>>($"{SharedProject.Api.url}/Categoria");
+        categorias.AddRange(result);
+    }
+
+    private async Task SaveForm()
+    {
+        await Save.InvokeAsync();
+        uriHelper.NavigateTo("Producto/list");
+    }
+}

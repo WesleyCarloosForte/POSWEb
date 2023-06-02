@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using SharedProject.DTOs;
-using Backend.Interface;
+using SharedProject.Interface;
 using SharedProject.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;

@@ -1,4 +1,6 @@
-﻿namespace SharedProject.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace SharedProject.Models
 {
     public class Compra
     {
@@ -6,6 +8,7 @@
         public int? ProveedorId { get; set; }
         public DateTime Fecha { get; set; }
         public string NumeroComprobante { get; set; }
+        [Column(TypeName = "decimal(18, 2)")]
         public decimal? TotalCompra { get; set; }
         public bool? Estado { get; set; }
 

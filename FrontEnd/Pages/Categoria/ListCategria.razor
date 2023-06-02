@@ -2,20 +2,20 @@
 @inject HttpClient http
 @inject IJSRuntime js
 @using Microsoft.AspNetCore.Components.Forms
+@inject SweetAlertService swl;
 
-    <h3>Categorias</h3>
+<h3>Categorías</h3>
 
-<div>
 <div class="input-group my-2 align-items-center">
     <div class="input-group-prepend">
         <span class="input-group-text" style="margin-right: 5px;"><i class="fas fa-search"></i></span>
     </div>
-    <input type="text" class="form-control px-2" placeholder="Buscar categoría..." @bind="txt" />
-        <div class="input-group-append" style="margin-left: 5px;">
+    <input type="text" class="form-contDocumento px-2" placeholder="Buscar" @bind="txt" />
+    <div class="input-group-append" style="margin-left: 5px;">
         <button class="btn btn-primary ml-2" type="button" @onclick="(()=>Buscar(txt))">Buscar</button>
     </div>
 </div>
-</div>
+
 
 @if (categorias == null)
 {
@@ -55,10 +55,13 @@ else
     </table>
 
 }
+<FrontEnd.Components.Buttons.ButtonNew Goto="Categoria/Create"></FrontEnd.Components.Buttons.ButtonNew>
 
 @code {
     private Components.Modals.ConfirmationModal confirmationModal;
     CategoriaViewDTO[] categorias { get; set; }
+
+
     string txt="";
     protected override async Task OnInitializedAsync()
     {
@@ -71,16 +74,24 @@ else
     async Task Delete(int id)
     {
         var categoria = categorias.FirstOrDefault(x => x.Id == id);
-        if (await DeseasBorrar(categoria.Descripcion))
+        if (await new Utils.Functions(js,swl).ShowConfirmation("Deseas eliminar el registro?", "Confirmar")) 
         {
-            await http.DeleteAsync($"{SharedProject.Api.url}/Categoria/{id}");
-            await LoadCategorias();
+            var response = await http.DeleteAsync($"{SharedProject.Api.url}/Categoria/{id}");
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                await LoadCategorias();
+            else
+                await new Utils.Functions(js, swl).ShowError("No fue posible eliminar el registro", "Error");
+
         }
 
     }
-    async Task<Boolean> DeseasBorrar(string txt)
+
+    private async void SearchKeyPress(KeyboardEventArgs e)
     {
-        return await js.InvokeAsync<bool>("confirm", $"Deseas Eliminar el registro {txt}");   
+        if (e.Key == "Enter")
+        {
+            await Buscar(txt);
+        }
     }
 
     async Task Buscar(string txt)

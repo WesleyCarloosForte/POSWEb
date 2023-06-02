@@ -1,121 +1,422 @@
-﻿<EditForm Model="@this" OnValidSubmit="Checkout">
-    <div class="container">
-        <div class="product-list">
-            <h3>Productos Disponibles</h3>
-            <div class="form-row">
-                <div class="col-md-8">
-                    <div class="form-group">
-                        <label for="searchCode">Buscar por código de barras</label>
-                        <InputText id="searchCode" class="form-control" @bind-Value="searchCode" />
-                    </div>
+﻿@using SharedProject.Models;
+@inject IJSRuntime runtime
+@inject SweetAlertService swal
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Crea la interfaz de usuario -->
+            <div class="container">
+                <h3>Frente de Caja</h3>
+
+                <h5>Buscar por código de barras:</h5>
+                <div class="input-group">
+                    <input type="text" class="form-control" @bind="codigoBarras" id="codigoBarrasInput" placeholder="Ingrese el código de barras" @oninput="ActualizarCampo" @onkeydown="@(async (e) => { if (e.Key == "Enter") {  await Buscar(); } })" />
                 </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label for="quantity">Cantidad</label>
-                        <InputNumber id="quantity" class="form-control" @bind-Value="quantity" />
+
+                @if (productosEncontrados != null && productosEncontrados.Any())
+                {
+                    <div class="mt-4">
+                        <h6>Resultados:</h6>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Eliminar</th>
+                                    <th>Modificar Cantidad</th>
+                                    <th>Código</th>
+                                    <th>Prod</th>
+                                    <th>Precio</th>
+                                    <th>Cant</th>
+                                    <th>Total</th>
+                                    <th>IVA</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var producto in productosEncontrados)
+                                {
+                                    <tr>
+                                        <td>
+                                            <button class="btn btn-danger" @onclick="(() => EliminarProducto(producto.CodigoBarras))">-</button>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-primary" @onclick="(() => SumarCantidad(producto))">+</button>
+                                            <button class="btn btn-primary" @onclick="(() => RestarCantidad(producto))">-</button>
+                                        </td>
+                                        <td>@producto.CodigoBarras</td>
+                                        <td>@producto.Descripcion</td>
+                                        <td>@producto.PrecioVenta</td>
+                                        <td>@producto.Cantidad</td>
+
+                                        <td>@CalcularTotal(producto.Cantidad,producto.PrecioVenta)</td>
+                                        <td>@CalcularTotalIVA(producto.TotalVenta,producto.IVAPorcent)</td>
+
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
                     </div>
-                </div>
+                    <div class="mt-4">
+                        <p><strong>Total General de la Venta:</strong>@totalGeneralVenta.ToString("N2") PYG</p>
+                        <p><strong>Total de IVA:</strong> @totalIVA.ToString("N2") PYG</p>
+                    </div>
+                }
+                else if (codigoBarrasEncontrado && !productoEncontradoEncontrado)
+                {
+                    <div class="mt-4">
+                        <p class="text-danger">Seleccione un producto....</p>
+                    </div>
+                }
             </div>
-        <div class="cart">
-            <h3>Detalle de venta</h3>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Descripción</th>
-                        <th>Cantidad</th>
-                        <th>Precio Venta</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in CartItems)
-                    {
-                        <tr>
-                            <td>@item.Descripcion</td>
-                            <td>@item.Cantidad</td>
-                            <td>@item.PrecioVenta</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+
         </div>
-        <div class="checkout">
-            <h3>Total 20,0</h3>
-            <button class="btn btn-primary" type="submit">Finalizar</button>
+        <div class="col-md-4">
+            <!-- Crea la interfaz de usuario -->
+
+                        <!-- Card principal -->
+                        <div class="card">
+                            <div class="card-body">
+                                <!-- Card de Cliente -->
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Cliente</h5>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Ingrese el documento" @bind="documentoBusqueda" />
+                                    <button class="btn btn-primary" @onclick="BuscarCliente">Seleccionar</button>
+                                </div>
+
+                                @if (clienteSeleccionado != null)
+                                {
+                                    <div class="form-group mt-3">
+                                        <label for="nombreCliente">Nombre:</label>
+                                        <input type="text" class="form-control" id="nombreCliente" value="@clienteSeleccionado.DatosGenerales.Nombre" readonly />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="documentoCliente">Documento:</label>
+                                        <input type="text" class="form-control" id="documentoCliente" value="@clienteSeleccionado.DatosGenerales.NumeroDocumento" readonly />
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                                <!-- Card de Comprobante -->
+                    <!-- Card de Comprobante -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Comprobante</h5>
+                            <div class="input-group">
+                                <select class="form-control" @bind="comprobanteSeleccionado">
+                                    @foreach (var comprobante in listaComprobantes)
+                                    {
+                                        <option value="@comprobante.Id" selected="@comprobante.Id == comprobanteSeleccionado">@comprobante.Descripcion</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card de Pago -->
+                    <!-- Card de Pago y Totales -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Pago y Totales</h5>
+
+                            <div class="form-group">
+                                <label for="inputPago">Pago</label>
+                                <input type="number" class="form-control" id="inputPago"  placeholder="Ingrese el valor del pago"  />
+                            </div>
+
+                            <div class="form-group">
+                                <label>Total</label>
+                                <label>@GetTotalSinIVa(totalIVA,totalGeneralVenta).ToString("N2")</label>
+                            </div>
+
+                            <div class="form-group">
+                                <label>IVA</label>
+                                <label>@totalIVA.ToString("N2")</label>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Total General</label>
+                                <label>@totalGeneralVenta.ToString("N2")</label>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Vuelto</label>
+                                <label>0</label>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+            </div>
+
         </div>
     </div>
-    </div>
-</EditForm>
+</div>
+
+
+</div>
 
 @code {
-    private List<ProductoViewDTO> Products { get; set; } = new List<ProductoViewDTO>();
-    private List<CreateDetalleVentaDTO> CartItems { get; set; } = new List<CreateDetalleVentaDTO>();
-    private string searchCode { get; set; } = "";
-    private int quantity { get; set; } = 0;
+    // Propiedades
 
+    private decimal valorPago =0;
+    private string codigoBarras;
+    private List<CreateDetalleVentaDTO> productosEncontrados;
+    private List<ProductoViewDTO> productosReales;
+    private bool codigoBarrasEncontrado;
+    private bool productoEncontradoEncontrado;
+    ClienteViewDTO clienteSeleccionado = new ClienteViewDTO() { Id = 0, DatosGenerales = new DatosGenerales { Nombre = "Default", NumeroDocumento = "000000" } };
+    string documentoBusqueda = "";
+
+
+    List<ClienteViewDTO> listaClientes = new List<ClienteViewDTO>
+    {
+        new ClienteViewDTO { Id = 1, DatosGenerales = new DatosGenerales { Nombre = "Cliente 1", NumeroDocumento = "12345678" } },
+        new ClienteViewDTO { Id = 2, DatosGenerales = new DatosGenerales { Nombre = "Cliente 2", NumeroDocumento = "87654321" } },
+        new ClienteViewDTO() {Id=0, DatosGenerales = new DatosGenerales { Nombre = "Default", NumeroDocumento = "000000" } },
+        new ClienteViewDTO { Id = 3, DatosGenerales = new DatosGenerales { Nombre = "Cliente 3", NumeroDocumento = "98765432" } },
+    };
+
+    List<NumeracionComprobante> listaComprobantes = new List<NumeracionComprobante>
+    {
+        new NumeracionComprobante { Id = 1, Descripcion = "Recibo" },
+        new NumeracionComprobante { Id = 2, Descripcion = "Factura" }
+    };
+
+    int comprobanteSeleccionado = 1;
+
+    void BuscarCliente()
+    {
+        clienteSeleccionado = listaClientes.FirstOrDefault(c => c.DatosGenerales.NumeroDocumento == documentoBusqueda);
+
+        if (clienteSeleccionado == null)
+        {
+            clienteSeleccionado = listaClientes.FirstOrDefault(c => c.DatosGenerales.NumeroDocumento == "000000");
+        }
+
+        documentoBusqueda = "";
+    }
+
+    // Clase CreateDetalleVentaDTO
+    private class CreateDetalleVentaDTO
+    {
+        public int Id { get; set; }
+        public int VentaId { get; set; }
+        public int ProductoId { get; set; }
+        public string CodigoBarras { get; set; }
+        public string Descripcion { get; set; }
+        public decimal PrecioVenta { get; set; }
+        public decimal PrecioCompra { get; set; }
+        public decimal Cantidad { get; set; }
+        public decimal Descuento { get; set; }
+        public decimal TotalIVA { get; set; }
+        public int IVAPorcent { get; set; }
+        public decimal TotalVenta { get; set; }
+        public decimal TotalCompra { get; set; }
+    }
+    private decimal totalGeneralVenta;
+    private decimal totalIVA;
+
+    private decimal GetVuelto()
+    {
+        if (totalGeneralVenta != null)
+        {
+            if (valorPago != null)
+            {
+                return totalGeneralVenta - valorPago;
+            }
+            return totalGeneralVenta -0;
+        }
+        return 0;
+    }
+
+        // Método adicional para calcular el total general de la venta y el total de IVA
+        private void CalcularTotales()
+        {
+            totalGeneralVenta = productosEncontrados?.Sum(p => p.TotalVenta) ?? 0;
+            totalIVA = productosEncontrados?.Sum(p => p.TotalIVA) ?? 0;
+        }
+        private void ActualizarCampo(ChangeEventArgs e)
+        {
+            codigoBarras = e.Value.ToString();
+        }
+        private decimal GetTotalSinIVa(decimal iva, decimal total) => total - iva;
+
+    // Método de búsqueda
+    private async Task Buscar()
+    {
+        // Aquí realizarías la lógica de búsqueda y asignarías los productos encontrados a la lista productosEncontrados
+        // ...
+
+        // Ejemplo de asignación de valores
+        if (!string.IsNullOrWhiteSpace(codigoBarras) && !string.IsNullOrEmpty(codigoBarras))
+        {
+            var productoExistente = productosEncontrados?.FirstOrDefault(p => p.CodigoBarras == codigoBarras);
+            if (productoExistente != null)
+            {
+                productoExistente.Cantidad++;
+                productoExistente.TotalVenta = CalcularTotal(productoExistente.Cantidad,productoExistente.PrecioVenta);
+                productoExistente.TotalCompra = CalcularTotal(productoExistente.Cantidad, productoExistente.PrecioCompra);
+                productoExistente.TotalIVA = CalcularTotalIVA(productoExistente.TotalVenta,productoExistente.IVAPorcent);
+                CalcularTotales();
+            }
+            else
+            {
+                var producto = productosReales.FirstOrDefault(p => p.CodigoBarras == codigoBarras);
+                if (producto != null)
+                {
+                    var detalleVenta = new CreateDetalleVentaDTO
+                        {
+                            Id = producto.Id,
+                            VentaId = 1,
+                            ProductoId = producto.Id,
+                            CodigoBarras = producto.CodigoBarras,
+                            Descripcion = producto.Descripcion,
+                            PrecioVenta = producto.PrecioVenta,
+                            PrecioCompra = producto.PrecioCompra,
+                            Cantidad = 1,
+                            Descuento = 0,
+                            TotalIVA = CalcularTotalIVA(producto.PrecioVenta,producto.IvaPorcent),
+                            IVAPorcent = producto.IvaPorcent,
+                            TotalVenta = CalcularTotal(1,producto.PrecioVenta),
+                            TotalCompra = CalcularTotal(1, producto.PrecioCompra)
+                        };
+
+                    productosEncontrados.Add(detalleVenta);
+                    codigoBarrasEncontrado = true;
+                    productoEncontradoEncontrado = true;
+                    CalcularTotales();
+                }
+                else
+                {
+                    codigoBarrasEncontrado = true;
+                    productoEncontradoEncontrado = false;
+                }
+            }
+
+
+        }
+
+
+        // Mostrar alerta de error si el producto no fue encontrado
+        if (!productoEncontradoEncontrado)
+        {
+            await ShowError("El producto no fue encontrado.", "Error");
+        }
+
+        // Limpiar el campo de búsqueda y mantener el enfoque
+        codigoBarras = string.Empty;
+
+
+        await runtime.InvokeVoidAsync("eval", "document.getElementById('codigoBarrasInput').focus();");
+    }
+    private async Task HolaMundo(string texto)
+    {
+        var a = texto.Split("");
+    }
+
+    // Método para sumar la cantidad
+    private void SumarCantidad(CreateDetalleVentaDTO producto)
+    {
+        producto.Cantidad++;
+        producto.TotalVenta = CalcularTotal(producto.Cantidad,producto.PrecioVenta);
+        producto.TotalCompra = CalcularTotal(producto.Cantidad, producto.PrecioCompra);
+        producto.TotalIVA = CalcularTotalIVA(producto.TotalVenta,producto.IVAPorcent);
+        CalcularTotales();
+    }
+
+    // Método para restar la cantidad
+    private  void RestarCantidad(CreateDetalleVentaDTO producto)
+    {
+        if (producto.Cantidad > 1)
+        {
+            producto.Cantidad--;
+            producto.TotalVenta = CalcularTotal(producto.Cantidad,producto.PrecioVenta);
+            producto.TotalCompra = CalcularTotal(producto.Cantidad, producto.PrecioCompra);
+            producto.TotalIVA = CalcularTotalIVA(producto.TotalVenta,producto.IVAPorcent);
+        }
+        else
+        {
+            EliminarProducto(producto.CodigoBarras);
+        }
+        CalcularTotales();
+    }
+
+    // Método para calcular el total de venta
+    private decimal CalcularTotal(decimal cantidad, decimal precio)
+    {
+        return precio*cantidad;
+    }
+
+    // Método para calcular el total de compra
+
+
+    // Método para calcular el total de IVA
+    private decimal CalcularTotalIVA(decimal total,int ivaPorcent)
+    {
+
+        return (ivaPorcent * total) / 100;
+    }
+
+    // Método para eliminar un producto de la lista
+    private void EliminarProducto(string codigoBarras)
+    {
+        var item = productosEncontrados.Find(x => x.CodigoBarras == codigoBarras);
+        productosEncontrados.Remove(item);
+        CalcularTotales();
+    }
+
+    // Función para mostrar alertas de error
+    private async Task ShowError(string mensaje, string titulo)
+    {
+        await new Utils.Functions(runtime, swal).ShowError(mensaje, titulo);
+    }
+
+    private void InicializarProductos()
+    {
+        productosReales = new List<ProductoViewDTO>
+        {
+            new ProductoViewDTO
+            {
+                Id = 1,
+                CategoriaId = 1,
+                CodigoBarras = "001",
+                StockActual = 10,
+                StockMinimo = 5,
+                Descripcion = "Producto 1",
+                PrecioCompra = 5,
+                PrecioVenta = 10,
+                IvaPorcent = 10,
+                Categoria = "Categoría 1"
+            },
+            new ProductoViewDTO
+            {
+                Id = 2,
+                CategoriaId = 2,
+                CodigoBarras = "002",
+                StockActual = 20,
+                StockMinimo = 10,
+                Descripcion = "Producto 2",
+                PrecioCompra = 8,
+                PrecioVenta = 15,
+                IvaPorcent = 10,
+                Categoria = "Categoría 2"
+            },
+            // Agregar más productos aquí
+        };
+    }
+
+    // Método que se llama al iniciar el componente
     protected override void OnInitialized()
     {
-        Products = new List<ProductoViewDTO>
-    {
-        new ProductoViewDTO { Id = 1, CategoriaId = 1, CodigoBarras = "001", StockActual = 100, Descripcion = "Producto 1", PrecioCompra = 10.0m, PrecioVenta = 20.0m, IvaPorcent = 10 },
-        new ProductoViewDTO { Id = 2, CategoriaId = 1, CodigoBarras = "002", StockActual = 200, Descripcion = "Producto 2", PrecioCompra = 15.0m, PrecioVenta = 25.0m, IvaPorcent = 10 }
-    };
-
-        CartItems = new List<CreateDetalleVentaDTO>
-    {
-        new CreateDetalleVentaDTO
-        {
-            Id = 1,
-            Descripcion = "Producto 1",
-            VentaId = 1,
-            ProductoId = 1,
-            CodigoBarras = "001",
-            PrecioVenta = 20.0m,
-            PrecioCompra = 10.0m,
-            Cantidad = 1,
-            Descuento = 0.0m,
-            TotalIVa = 2.0m,
-            IvaPorcent = 10,
-            TotalVenta = 22.0m,
-            TotalCompra = 10.0m
-        }
-    };
-    }
-
-
-
-    private void SearchKeyPress(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter")
-        {
-            var product = Products.FirstOrDefault(p => p.CodigoBarras == searchCode);
-            if (product != null)
-            {
-                AddToCart(product);
-            }
-        }
-    }
-
-    private void AddToCartKeyPress(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter")
-        {
-            var product = Products.FirstOrDefault(p => p.CodigoBarras == searchCode);
-            if (product != null && quantity > 0)
-            {
-                AddToCart(product, quantity);
-                quantity = 0;
-            }
-        }
-    }
-
-    private void AddToCart(ProductoViewDTO product, int quantity = 1)
-    {
-        // Lógica para agregar el producto al carrito de compras con la cantidad especificada
-        // Crea una instancia de la clase CartItem y agrega el ítem al carrito de compras (CartItems)
-    }
-
-    private void Checkout()
-    {
-        // Lógica para procesar el pago y finalizar la venta
+        InicializarProductos();
+        productosEncontrados = new List<CreateDetalleVentaDTO>();
+        codigoBarras = string.Empty;
+        CalcularTotales();
     }
 }
+

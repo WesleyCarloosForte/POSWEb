@@ -1,0 +1,28 @@
+﻿@page "/Producto/create"
+@using SharedProject.Models;
+@inject HttpClient http
+@inject IJSRuntime runtime
+@inject SweetAlertService swl
+
+
+<h3>Registrar Producto</h3>
+<ProductoForm Id="0" Save="@Save" Producto="@Producto">
+
+</ProductoForm>
+@code {
+
+
+    ProductoCreateDTO Producto = new ProductoCreateDTO ();
+
+    async Task Save()
+    {
+        var result = await http.PostAsJsonAsync($"{SharedProject.Api.url}/Producto", Producto);
+        if (result.StatusCode == System.Net.HttpStatusCode.Created)
+        {
+            await new Utils.Functions(runtime, swl).ShowSaved();
+
+        }
+        else await new Utils.Functions(runtime, swl).ShowError("No fue posible realizar la operacion", "Error");
+
+    }
+}

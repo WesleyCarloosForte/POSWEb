@@ -1,0 +1,113 @@
+﻿@page "/comprobante/list"
+@inject HttpClient http
+@inject IJSRuntime js
+@using Microsoft.AspNetCore.Components.Forms
+@using SharedProject.Models;
+@inject SweetAlertService swl;
+
+<h3>Comprobantes</h3>
+
+<div class="input-group my-2 align-items-center">
+    <div class="input-group-prepend">
+        <span class="input-group-text" style="margin-right: 5px;"><i class="fas fa-search"></i></span>
+    </div>
+    <input type="text" class="form-contDocumento px-2" placeholder="Buscar" @bind="txt" />
+    <div class="input-group-append" style="margin-left: 5px;">
+        <button class="btn btn-primary ml-2" type="button" @onclick="(()=>Buscar(txt))">Buscar</button>
+    </div>
+</div>
+
+
+@if (Comprobantes == null)
+{
+    <text>Cargando...</text>
+}
+else if(Comprobantes.Length==0)
+{
+    <text>No hay categoris en la base de datos!</text>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th hidden>Id</th>
+                <th>Descripción</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var comprobante in Comprobantes)
+            {
+                <tr>
+                    <td hidden>@comprobante.Id</td>
+                    <td>@comprobante.Descripcion</td>
+                    <td>
+                        <a class="btn btn-success" href="comprobante/edit/@comprobante.Id">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button class="btn btn-danger" @onclick="(()=>Delete(comprobante.Id))">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+<FrontEnd.Components.Buttons.ButtonNew Goto="comprobante/Create"></FrontEnd.Components.Buttons.ButtonNew>
+@code {
+    private Components.Modals.ConfirmationModal confirmationModal;
+    NumeracionComprobante[] Comprobantes { get; set; }
+
+
+    string txt="";
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadComprobantes();
+    }
+    async Task LoadComprobantes()
+    {
+        Comprobantes = await http.GetFromJsonAsync<NumeracionComprobante[]>($"{SharedProject.Api.url}/NumeracionComprobante");
+    }
+    async Task Delete(int id)
+    {
+        var comprobante = Comprobantes.FirstOrDefault(x => x.Id == id);
+        if (await new Utils.Functions(js,swl).ShowConfirmation("Deseas eliminar el registro?", "Confirmar")) 
+        {
+            var response = await http.DeleteAsync($"{SharedProject.Api.url}/NumeracionComprobante/{id}");
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                await LoadComprobantes();
+            else
+                await new Utils.Functions(js, swl).ShowError("No fue posible eliminar el registro", "Error");
+
+        }
+
+    }
+
+    private async void SearchKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await Buscar(txt);
+        }
+    }
+
+    async Task Buscar(string txt)
+    {
+        if (string.IsNullOrEmpty(txt) || string.IsNullOrWhiteSpace(txt))
+            await LoadComprobantes();
+        else
+        {
+            var a = await http.GetFromJsonAsync<IEnumerable<NumeracionComprobante>>($"{SharedProject.Api.url}/NumeracionComprobante/filter/{txt}");
+            Comprobantes = a.ToArray();
+        }
+      
+    }
+
+
+  
+
+
+}

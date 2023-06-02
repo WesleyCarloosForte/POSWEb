@@ -1,0 +1,117 @@
+﻿@page "/Usuario/list"
+@inject HttpClient http
+@inject IJSRuntime js
+@using Microsoft.AspNetCore.Components.Forms
+@inject SweetAlertService swl;
+<h3>Usuarios</h3>
+
+<div class="input-group my-2 align-items-center">
+    <div class="input-group-prepend">
+        <span class="input-group-text" style="margin-right: 5px;"><i class="fas fa-search"></i></span>
+    </div>
+    <input type="text" class="form-contUsuario px-2" placeholder="Buscar" @bind="txt" />
+    <div class="input-group-append" style="margin-left: 5px;">
+        <button class="btn btn-primary ml-2" type="button" @onclick="(()=>Buscar(txt))">Buscar</button>
+    </div>
+</div>
+
+
+@if (Usuarios == null)
+{
+    <text>Cargando...</text>
+}
+else if (Usuarios.Length == 0)
+{
+    <text>No hay categoris en la base de datos!</text>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th hidden>Id</th>
+                <th>Nombre</th>
+                <th>Documento</th>
+                <th>Login</th>
+                <th>Rol</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var Usuario in Usuarios)
+            {
+                <tr>
+                    <td hidden>@Usuario.Id</td>
+                    <td>@Usuario.DatosGenerales.Nombre</td>
+                     <td>@Usuario.DatosGenerales.NumeroDocumento</td>
+                     <td>@Usuario.Login</td>
+                     <td>@Usuario.Rol.Descripcion</td>
+                    <td>
+                        <a class="btn btn-success" href="Usuario/edit/@Usuario.Id">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button class="btn btn-danger" @onclick="(()=>Delete(Usuario.Id))">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+<FrontEnd.Components.Buttons.ButtonNew Goto="Usuario/Create"></FrontEnd.Components.Buttons.ButtonNew>
+@code {
+    private Components.Modals.ConfirmationModal confirmationModal;
+    UsuarioViewDTO[] Usuarios { get; set; }
+
+
+    string txt = "";
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsuarios();
+    }
+    async Task LoadUsuarios()
+    {
+        Usuarios = await http.GetFromJsonAsync<UsuarioViewDTO[]>($"{SharedProject.Api.url}/Usuario");
+    }
+    async Task Delete(int id)
+    {
+        var Usuario = Usuarios.FirstOrDefault(x => x.Id == id);
+        if (await new Utils.Functions(js, swl).ShowConfirmation("Deseas eliminar el registro?", "Confirmar"))
+        {
+            var response = await http.DeleteAsync($"{SharedProject.Api.url}/Usuario/{id}");
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                await LoadUsuarios();
+            else
+                await new Utils.Functions(js, swl).ShowError("No fue posible eliminar el registro", "Error");
+
+        }
+
+    }
+
+    private async void SearchKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await Buscar(txt);
+        }
+    }
+
+    async Task Buscar(string txt)
+    {
+        if (string.IsNullOrEmpty(txt) || string.IsNullOrWhiteSpace(txt))
+            await LoadUsuarios();
+        else
+        {
+            var a = await http.GetFromJsonAsync<IEnumerable<UsuarioViewDTO>>($"{SharedProject.Api.url}/Usuario/filter/{txt}");
+            Usuarios = a.ToArray();
+        }
+
+    }
+
+
+
+
+
+}

@@ -1,5 +1,5 @@
 ﻿using Backend.Data;
-using Backend.Interface;
+using SharedProject.Interface;
 using SharedProject.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,19 +14,26 @@ namespace Backend.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Producto>> GetProductosWithData()
+        public async Task<IEnumerable<Producto>> GetProductosWithDataFilter(Func<Producto, bool> condiction = null)
         {
-           return await _context.Productos.Include(x=>x.Categoria).ToListAsync(); 
+            if (condiction==null)
+                return await _context.Productos.Include(x=>x.Categoria).ToListAsync(); 
+            else
+                return  _context.Productos.Include(x => x.Categoria).Where(condiction).ToList();
+
         }
 
-        public  async Task<Producto> GetProductosWithData(int id)
+        public  async Task<Producto> GetProductoWithData(int id)
         {
             return await _context.Productos.Include(c => c.Categoria).FirstOrDefaultAsync(x=>x.Id==id);
         }
 
-        public async Task<IEnumerable<Producto>> GetProductosWithDataInStock()
+        public async Task<IEnumerable<Producto>> GetProductosWithDataInStock(Func<Producto, bool> condiction = null)
         {
+            if (condiction==null)
             return await _context.Productos.Include(x => x.Categoria).Where(x => x.StockActual > 0).ToListAsync();
+
+            return  _context.Productos.Include(x => x.Categoria).Where(x => x.StockActual > 0).ToList();
         }
 
         public async Task<Producto> GetProductosWithDataInStock(int id)
@@ -46,9 +53,11 @@ namespace Backend.Repositories
             result.StockActual = +cantidad;
         }
 
-        Task<Producto> IProductoRepository.GetProductosWithDataInStock()
+
+
+         async Task<Producto> IProductoRepository.GetProductoWithDataInStock(Func<Producto, bool> condiction)
         {
-            throw new NotImplementedException();
+            return  _context.Productos.Where(condiction).Where(x=>x.StockActual>0).FirstOrDefault();
         }
     }
 }

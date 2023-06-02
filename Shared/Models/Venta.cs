@@ -1,4 +1,6 @@
-﻿namespace SharedProject.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace SharedProject.Models
 {
     public class Venta
     {
@@ -10,6 +12,7 @@
         public string Timbrado { get; set; }
         public string Establecimiento { get; set; }
         public string PuntoExpedicion { get; set; }
+        [Column(TypeName = "decimal(18, 2)")]
         public decimal? TotalCompra { get; set; }
         public bool? Estado { get; set; }
 

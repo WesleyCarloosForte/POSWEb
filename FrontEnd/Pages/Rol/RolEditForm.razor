@@ -1,0 +1,40 @@
+﻿@page "/Rol/edit/{Id:int}"
+@inject HttpClient http
+@inject IJSRuntime runtime;
+@inject SweetAlertService swl;
+
+<h3>Editar Rol</h3>
+<RolForm Id="Id" Save="@Save" Rol="@Rol">
+
+</RolForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    RolViewDTO Rol = new RolViewDTO();
+
+    async Task Save()
+    {
+        var result =await http.PutAsJsonAsync($"{SharedProject.Api.url}/Rol/{Id}", Rol);
+        if (result.StatusCode == System.Net.HttpStatusCode.NoContent)
+        {
+          await  new Utils.Functions(runtime, swl).ShowSaved();    
+
+        }
+        else await new Utils.Functions(runtime, swl).ShowError("No fue posible realizar la operacion","Error");
+
+
+
+    }
+
+    protected async override Task OnParametersSetAsync()
+    {
+        // Llama al método base para realizar las operaciones por defecto
+        await base.OnParametersSetAsync();
+
+        Rol = await http.GetFromJsonAsync<RolViewDTO>($"{SharedProject.Api.url}/Rol/{Id}");
+
+
+    }
+}

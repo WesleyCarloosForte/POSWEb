@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Repositories{ 
-public class Repository<T> : Interface.IRepository<T> where T : class
+public class Repository<T> : SharedProject.Interface.IRepository<T> where T : class
 {
     private readonly DataContext _context;
     private readonly DbSet<T> _dbSet;
@@ -15,7 +15,7 @@ public class Repository<T> : Interface.IRepository<T> where T : class
 
     public IEnumerable<T> GetAll()
     {
-        return _dbSet.ToList();
+        return _dbSet.Take(100).ToList();
     }
 
     public T GetById(int id)

@@ -1,4 +1,4 @@
-﻿using Backend.Interface;
+﻿using SharedProject.Interface;
 using SharedProject.Models;
 
 public interface IUsuarioRepository : IRepository<Usuario>
