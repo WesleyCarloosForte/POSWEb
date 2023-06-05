@@ -20,6 +20,7 @@ namespace  SharedProject.DTOs
         //Es el tanto porciento del precio total del producto ese porcentaje se reprecenta por el totalIVA
         [DisplayFormat(DataFormatString = "{0:N2}", ApplyFormatInEditMode = true)]
         public decimal TotalIVa { get; set; }
+       
         public int IvaPorcent { get; set; }
         [DisplayFormat(DataFormatString = "{0:N2}", ApplyFormatInEditMode = true)]
         public decimal TotalVenta { get; set; }

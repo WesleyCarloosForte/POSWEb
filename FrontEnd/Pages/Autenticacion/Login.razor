@@ -1,0 +1,105 @@
+﻿@page "/login"
+@using System.ComponentModel.DataAnnotations
+@using SharedProject.Models;
+@inject NavigationManager navManager
+
+
+
+<div class="row mt-5">
+
+    <div class="col-lg-4 offset-lg-4 border">
+
+        <div class="mb-3 text-center">
+            <h3> Login </h3>
+        </div>
+
+        <div class="mb-3">
+            <label>Correo</label>
+            <input @bind="login" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>Contraseña</label>
+            <input @bind="password" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <button @onclick="LoginRes" class="btn btn-primary">Login</button>
+        </div>
+
+    </div>
+
+</div>
+@code {
+    private string login;
+    private string password;
+
+    [Inject]
+    protected IJSRuntime JSRuntime { get; set; }
+    [Inject]
+    protected NavigationManager NavigationManager { get; set; }
+
+    public async Task GuardarUsuario(UsuarioViewDTO usuario)
+    {
+        var a = new UsuarioViewDTO
+{
+    RolId = 1,
+    Id = 1,
+    DatosGeneralesId = 1,
+    Login = "nombreusuario",
+    Password = "contrasena",
+    Rol = new Rol { Id = 1, Descripcion = "Administrador" },
+    DatosGenerales = new DatosGenerales
+    {
+        Id = 1,
+        Nombre = "Nombre ficticio",
+        Direccion = "Dirección ficticia",
+        Telefono = "123456789",
+        Email = "correo@ejemplo.com",
+        NumeroDocumento = "1234567890",
+        Estado = true,
+        DocumentoId = 1,
+        Documento = new Documento { Id = 1, Descripcion = "Documento ficticio" }
+    }
+};
+
+        await RemoverUsuario();
+        string usuarioJson = System.Text.Json.JsonSerializer.Serialize(a);
+        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "Usuario", usuarioJson);
+    }
+
+    public async Task RemoverUsuario()
+    {
+        var usuarioJson = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "Usuario");
+        if (!string.IsNullOrEmpty(usuarioJson))
+        {
+            await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "Usuario");
+            // Realizar cualquier otra acción después de eliminar el usuario
+        }
+    }
+
+    private async Task LoginRes()
+    {
+        var validationContext = new ValidationContext(this);
+        var validationResults = new List<ValidationResult>();
+
+        await GuardarUsuario(new UsuarioViewDTO());
+
+        // Aquí puedes agregar la lógica para autenticar al usuario
+        // utilizando el valor de "login" y "password"
+
+        // Redirigir a la página principal después de iniciar sesión
+        NavigationManager.NavigateTo("/");
+    }
+/**
+    public async Task<UsuarioViewDTO> ValidarCredenciales()
+    {
+        if(!string.IsNullOrEmpty(login) || !string.IsNullOrEmpty(password))
+        {
+            
+        }
+        
+    }
+    */
+   
+}

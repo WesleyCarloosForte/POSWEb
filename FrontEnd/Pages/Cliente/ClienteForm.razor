@@ -3,6 +3,7 @@
 @using System.Collections.Generic
 @inject HttpClient http
 @inject NavigationManager uriHelper
+@inject SweetAlertService swl;
 
 @if ( documentos != null)
 {
@@ -75,6 +76,8 @@ else
 <FrontEnd.Components.Buttons.ButtonBack Goto="Cliente/List"></FrontEnd.Components.Buttons.ButtonBack>
 
 @code {
+    [Inject]
+    IJSRuntime runtime { get; set; }
     [Parameter]
     public EventCallback Save { get; set; }
     [Parameter]
@@ -96,7 +99,15 @@ else
 
     private async Task SaveForm()
     {
-        await Save.InvokeAsync();
-        uriHelper.NavigateTo("Cliente/list");
+        if (Cliente.DocumentoId != 0)
+        {
+            await Save.InvokeAsync();
+            uriHelper.NavigateTo("Cliente/list");
+        }
+        else
+        {
+           await new Utils.Functions(runtime,swl).ShowError("Seleccione un documento","");
+        }
+
     }
 }

@@ -39,11 +39,22 @@ namespace Backend.Controllers
 
             return Ok(producto);
         }
+        [HttpGet("Consultar/{barCode}/{cantidad}")]
+        public async Task<ActionResult<bool>> GetbarCode(string barCode, int cantidad)
+        {
+            var producto = await _productoRepository.GetProductoWithDataInStock(x => x.CodigoBarras == barCode && x.StockActual>=cantidad);
 
+            if (producto == null)
+            {
+                return Ok(false);
+            }
+
+            return Ok(true);
+        }
         [HttpGet("barCode/{barCode}")]
         public async Task<ActionResult<Producto>> GetbarCode(string barCode)
         {
-            var producto = await _productoRepository.GetProductoWithDataInStock(x=>x.CodigoBarras== barCode);
+            var producto = await _productoRepository.GetProductoWithDataInStock(x => x.CodigoBarras == barCode);
 
             if (producto == null)
             {
@@ -51,6 +62,19 @@ namespace Backend.Controllers
             }
 
             return Ok(producto);
+        }
+
+        [HttpGet("barCode/Compra/{barCode}")]
+        public async Task<ActionResult<Producto>> GetbarCodeCompra(string barCode)
+        {
+            var producto = await _productoRepository.GetProductosWithDataFilter(x=>x.CodigoBarras== barCode);
+
+            if (producto == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(producto.FirstOrDefault());
         }
 
         [HttpGet("filter/{txt}")]

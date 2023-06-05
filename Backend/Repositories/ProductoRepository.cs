@@ -54,8 +54,7 @@ namespace Backend.Repositories
         }
 
 
-
-         async Task<Producto> IProductoRepository.GetProductoWithDataInStock(Func<Producto, bool> condiction)
+        async Task<Producto> IProductoRepository.GetProductoWithDataInStock(Func<Producto, bool> condiction)
         {
             return  _context.Productos.Where(condiction).Where(x=>x.StockActual>0).FirstOrDefault();
         }

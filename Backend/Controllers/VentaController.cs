@@ -122,15 +122,18 @@ namespace Backend.Controllers
 
             venta.DetallesVenta = DetalleCompra;
 
-            _VentaRepository.Add(venta);
-            var compraDTO = _mapper.Map<CreateVentaDTO>(venta);
-            return CreatedAtAction(nameof(GetCompra), new { id = compraDTO.Id }, compraDTO);
+            await _VentaRepository.AddAsync(venta);
+
+            
+
+            var compraDTO = _mapper.Map<VentaViewDTO>(venta);
+            return Ok( compraDTO);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, CreateVentaDTO compraUpdateDTO)
+        public async Task<IActionResult> Update(int id)
         {
-            if (id != compraUpdateDTO.Id)
+            if (id==null)
             {
                 return BadRequest();
             }
@@ -141,7 +144,7 @@ namespace Backend.Controllers
                 return NotFound();
             }
 
-            _mapper.Map(compraUpdateDTO, venta);
+            venta.Estado=false;
             _VentaRepository.Update(venta);
 
             return NoContent();

@@ -111,6 +111,10 @@ else
     public UsuarioCreateDTO Usuario { get; set; } = new UsuarioCreateDTO();
     List<RolViewDTO> roles;
     List<DocumentoViewDTO> documentos;
+    [Inject]
+    IJSRuntime runtime { get; set; }
+    [Inject]
+    SweetAlertService swl { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -130,7 +134,21 @@ else
 
     private async Task SaveForm()
     {
-        await Save.InvokeAsync();
-        uriHelper.NavigateTo("Usuario/list");
+
+        if (Usuario.DocumentoId ==0)
+        {
+            await new Utils.Functions(runtime, swl).ShowError("Seleccione un rol", "");
+        }
+        if (Usuario.DocumentoId == 0)
+        {
+            await new Utils.Functions(runtime, swl).ShowError("Seleccione un documento", "");
+        }
+        else if(Usuario.DocumentoId!=0 && Usuario.RolId != 0)
+        {
+            await Save.InvokeAsync();
+            uriHelper.NavigateTo("Usuario/list");
+        }
+
+
     }
 }

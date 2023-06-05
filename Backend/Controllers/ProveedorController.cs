@@ -41,6 +41,33 @@ namespace Backend.Controllers
             var clienteDTO = _mapper.Map<ProveedorViewDTO>(cliente);
             return Ok(clienteDTO);
         }
+
+
+        [HttpGet("documento/{documento}")]
+        public async Task<ActionResult<ProveedorViewDTO>> GetCliente(string documento)
+        {
+            try
+            {
+                var ress = await _clienteRepository.GetClientesWithData(x => x.DatosGenerales.NumeroDocumento == documento);
+                var cliente = ress?.FirstOrDefault();
+                if (cliente == null)
+                {
+                    var r = await _clienteRepository.GetClientesWithData(x => x.DatosGenerales.Nombre == "Default");
+                    cliente = r?.FirstOrDefault();
+                    if (cliente == null)
+                        return NotFound();
+
+                }
+                var clienteDTO = _mapper.Map<ProveedorViewDTO>(cliente);
+                return Ok(clienteDTO);
+            }
+            catch (Exception)
+            {
+
+                return BadRequest();
+            }
+
+        }
         [HttpGet("filter/{txt}")]
         public async Task<ActionResult<IEnumerable<ProveedorViewDTO>>> GetFilterCliente(string txt)
         {

@@ -9,6 +9,8 @@ namespace  SharedProject.DTOs
         public int? ClienteId { get; set; }
         public int? ComprobanteId { get; set; }
         public DateTime Fecha { get; set; }
+        public DateTime FechaInicio { get; set; }
+        public DateTime FechaFin { get; set; }
         public string NumeroComprobante { get; set; }
         public string Timbrado { get; set; }
         public string Establecimiento { get; set; }

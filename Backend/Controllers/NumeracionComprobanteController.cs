@@ -44,15 +44,19 @@ namespace Backend.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<IEnumerable<NumeracionComprobante>> GetById(int id)
+        public ActionResult<NumeracionComprobante> GetById(int id)
         {
             var numeracion = _repository.GetById(id);
             if (numeracion == null)
             {
+                numeracion= _repository.GetById(1);
+                if (numeracion == null)
                 return NotFound();
             }
             return Ok(numeracion);
         }
+
+
 
         [HttpPost]
         public ActionResult<IEnumerable<NumeracionComprobante>> Create(NumeracionComprobante numeracion)

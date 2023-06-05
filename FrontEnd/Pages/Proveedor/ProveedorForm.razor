@@ -82,6 +82,10 @@ else
     [Parameter]
     public ProveedorCreateDTO Proveedor { get; set; } = new ProveedorCreateDTO();
     List<DocumentoViewDTO> documentos;
+    [Inject]
+    IJSRuntime runtime { get; set; }
+    [Inject]
+    SweetAlertService swl {get;set;}
 
     protected override async Task OnInitializedAsync()
     {
@@ -96,7 +100,15 @@ else
 
     private async Task SaveForm()
     {
-        await Save.InvokeAsync();
-        uriHelper.NavigateTo("Proveedor/list");
+        if (Proveedor.DocumentoId != 0)
+        {
+            await Save.InvokeAsync();
+            uriHelper.NavigateTo("Proveedor/list");
+        }
+        else
+        {
+            await new Utils.Functions(runtime, swl).ShowError("Seleccione un documento", "");
+        }
+
     }
 }

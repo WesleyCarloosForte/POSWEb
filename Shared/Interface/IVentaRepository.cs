@@ -6,6 +6,7 @@ namespace SharedProject.Interface
     {
         Task<IEnumerable<Venta>> GetComprasWithData();
         Task<Venta> GetComprasWithData(int id);
+        Task AddAsync(Venta venta);
 
     }
 }

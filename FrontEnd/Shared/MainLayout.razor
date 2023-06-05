@@ -1,17 +1,65 @@
 ﻿@inherits LayoutComponentBase
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+    @if (MostrarMenu)
+    {
+        <div class="sidebar">
+            <NavMenu />
+        </div>
+    }
+
 
     <main>
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
+        @if (MostrarMenu)
+        {
+            <div class="top-row px-4">
+                <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            </div>
 
+        }
         <article class="content px-4">
             @Body
         </article>
     </main>
 </div>
+
+
+@code {
+    bool MostrarMenu;
+    UsuarioViewDTO usuario;
+    [Inject]
+    protected IJSRuntime JSRuntime { get; set; }
+
+
+    [Inject]
+    protected NavigationManager NavigationManager { get; set; }
+
+    private async Task<UsuarioViewDTO> LeerUsuarioDesdeLocalStorage()
+    {
+        var usuarioJson = await  JSRuntime.InvokeAsync<string>("localStorage.getItem", "Usuario");
+        if (!string.IsNullOrEmpty(usuarioJson))
+        {
+            return  System.Text.Json.JsonSerializer.Deserialize<UsuarioViewDTO>(usuarioJson);
+        }
+        return null;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Leer datos del LocalStorage al inicializar el componente
+        usuario= await LeerUsuarioDesdeLocalStorage();
+
+        if (usuario == null || usuario.RolId !=1)
+        {
+            MostrarMenu = false;
+            if(usuario==null)
+            NavigationManager.NavigateTo("/login");
+        }
+        else
+        {
+            MostrarMenu = true;
+            NavigationManager.NavigateTo("/");
+        }
+        await Task.Delay(1000);
+    }
+}

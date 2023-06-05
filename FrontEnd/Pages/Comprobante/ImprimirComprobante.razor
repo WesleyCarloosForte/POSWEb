@@ -1,0 +1,40 @@
+﻿@page "/comprobante/imprimir/{Id:int}"
+@using SharedProject.Models;
+<h3>ImprimirComprobante</h3>
+<FrontEnd.Components.Comprobante Clientetes="@cliente" ValorFiscal="@valorFiscal" Venta="@compra"></FrontEnd.Components.Comprobante>
+@code {
+    Cliente cliente;
+    VentaViewDTO compra ;
+
+    bool valorFiscal = false;
+    [Inject]
+    IJSRuntime runtime { get; set; }
+    [Inject]
+    HttpClient http { get; set; }
+    [Inject]
+    SweetAlertService swl { get; set; }
+    [Parameter]
+    public int Id { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        compra = await http.GetFromJsonAsync<VentaViewDTO>($"{SharedProject.Api.url}/Venta/{Id}");
+
+        
+        if (compra != null)
+        {
+            compra.Comprobante = await http.GetFromJsonAsync<NumeracionComprobante>($"{SharedProject.Api.url}/NumeracionComprobante/{compra.ComprobanteId}");
+            valorFiscal = compra.Comprobante.ValorFiscal; // Access the ValorFiscal property of the Comprobante if it exists
+            cliente = await http.GetFromJsonAsync<Cliente>($"{SharedProject.Api.url}/Clientes/{compra.ClienteId}");
+
+        }
+
+        // Assigning the ValorFiscal property outside the null check seems redundant, so you can remove this line if not needed
+    }
+
+
+
+
+    
+}

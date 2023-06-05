@@ -29,7 +29,20 @@ namespace Backend.AutoMapper
 
             CreateMap<CreateVentaDTO, Venta>()
                .ForMember(dest => dest.Id, opt => opt.Ignore())
-               .ForMember(dest => dest.DetallesVenta, opt => opt.MapFrom(src => src.DetallesVenta));
+               .ForMember(dest => dest.DetallesVenta, opt => opt.MapFrom(src => src.DetallesVenta))
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+               .ForMember(dest => dest.Fecha, opt => opt.MapFrom(src => src.Fecha))
+               .ForMember(dest => dest.NumeroComprobante, opt => opt.MapFrom(src => src.NumeroComprobante))
+               .ForMember(dest => dest.TotalCompra, opt => opt.MapFrom(src => src.TotalCompra))
+               .ForMember(dest => dest.Estado, opt => opt.MapFrom(src => src.Estado))
+               .ForMember(dest => dest.DetallesVenta, opt => opt.MapFrom(src => src.DetallesVenta))
+               .ForMember(dest => dest.ClienteId, opt => opt.MapFrom(src => src.ClienteId))
+               .ForMember(dest => dest.ComprobanteId, opt => opt.MapFrom(src => src.ComprobanteId))
+               .ForMember(dest => dest.Timbrado, opt => opt.MapFrom(src => src.Timbrado))
+               .ForMember(dest => dest.Establecimiento, opt => opt.MapFrom(src => src.Establecimiento))
+               .ForMember(dest => dest.PuntoExpedicion, opt => opt.MapFrom(src => src.PuntoExpedicion))
+               .ForMember(dest => dest.FechaInicio, opt => opt.MapFrom(src => src.FechaInicio))
+            .ForMember(dest => dest.FechaFin, opt => opt.MapFrom(src => src.FechaFin));
 
             CreateMap<Venta, CreateVentaDTO>();
 
@@ -44,7 +57,9 @@ namespace Backend.AutoMapper
                .ForMember(dest => dest.ComprobanteId, opt => opt.MapFrom(src => src.ComprobanteId))
                .ForMember(dest => dest.Timbrado, opt => opt.MapFrom(src => src.Timbrado))
                .ForMember(dest => dest.Establecimiento, opt => opt.MapFrom(src => src.Establecimiento))
-               .ForMember(dest => dest.PuntoExpedicion, opt => opt.MapFrom(src => src.PuntoExpedicion));
+               .ForMember(dest => dest.PuntoExpedicion, opt => opt.MapFrom(src => src.PuntoExpedicion))
+               .ForMember(dest=>dest.FechaInicio ,opt=>opt.MapFrom(src=>src.FechaInicio))
+            .ForMember(dest => dest.FechaFin, opt => opt.MapFrom(src => src.FechaFin));
 
 
             CreateMap<DetalleCompra, DetalleCompraCreateDTO>();
@@ -170,6 +185,19 @@ namespace Backend.AutoMapper
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.DatosGenerales.Email))
                 .ForMember(dest => dest.Estado, opt => opt.MapFrom(src => src.DatosGenerales.Estado))
                 .ForMember(dest=>dest.NumeroDocumento,opt=>opt.MapFrom(src=>src.DatosGenerales.NumeroDocumento));
+
+            CreateMap<VentaViewDTO, Venta>()
+            .ForMember(dest => dest.DetallesVenta, opt => opt.MapFrom(src => src.DetallesVenta))
+            .ForMember(dest => dest.Cliente, opt => opt.MapFrom(src => src.Cliente))
+            .ForMember(dest => dest.Comprobante, opt => opt.MapFrom(src => src.Comprobante))
+            .ForMember(dest => dest.FechaInicio, opt => opt.MapFrom(src => src.FechaInicio))
+            .ForMember(dest => dest.FechaFin, opt => opt.MapFrom(src => src.FechaFin))
+            .ReverseMap();
+
+            CreateMap<DetalleVentaViewDTO, DetalleVenta>()
+                .ForMember(dest => dest.Descripcion, opt => opt.MapFrom(src => src.Producto))
+                .ReverseMap();
         }
     }
-}
+    }
+

@@ -1,0 +1,236 @@
+﻿@page "/compras"
+@using Newtonsoft.Json;
+@using SharedProject.Models;
+@using System.Text.Json;
+@inject IJSRuntime runtime
+@inject SweetAlertService swal
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Crea la interfaz de usuario -->
+            <div class="container">
+                <h3>Ingreso de Productos</h3>
+
+                <h5>Buscar por código de barras:</h5>
+                <div class="input-group">
+                    <input type="text" class="form-control" @bind="codigoBarras" id="codigoBarrasInput" placeholder="Ingrese el código de barras" @oninput="ActualizarCampo" @onkeydown="HandleKeyDown" />
+                </div>
+
+
+              
+            </div>
+
+        </div>
+        @if (ProductoItem != null )
+        {
+                 <div class="mt-4" >
+
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Card de Cliente -->
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Producto</h5>
+                                <div class="input-group">
+                                    <label class="form-control">Producto: @ProductoItem.Descripcion</label>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="documentoCliente">Cantidad:</label>
+                                    <input type="number" class="form-control" placeholder="Ingrese la cantidad"  @bind="Cantidad" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="documentoCliente">Precio Unitario:</label>
+                                    <input type="number" class="form-control" placeholder="Ingrese el precio de compra" @bind="Valor" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="documentoCliente">Numero comprobante:</label>
+                                    <input type="number" class="form-control" placeholder="Ingrese el comprobante" @bind="Comprobante" />
+                                </div>
+                                <div class="input-group">
+                                </div>
+                        </div>
+
+
+
+
+                    </div>
+
+                </div>
+
+                </div>
+
+                 </div>
+            <div class="col-md-4">
+                <!-- Crea la interfaz de usuario -->
+                <!-- Card principal -->
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Card de Cliente -->
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Proveedor</h5>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Ingrese el documento" @oninput="ActualizarCampoProveedor" @onkeydown="HandleKeyDownProveedor" @bind="documentoBusqueda" />
+                                </div>
+
+                                @if (clienteSeleccionado != null)
+                                {
+                                    <div class="form-group mt-3">
+                                        <label for="nombreCliente">Nombre:</label>
+                                        <input type="text" class="form-control" id="nombreCliente" value="@clienteSeleccionado.DatosGenerales.Nombre" readonly />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="documentoCliente">Documento:</label>
+                                        <input type="text" class="form-control" id="documentoCliente" value="@clienteSeleccionado.DatosGenerales.NumeroDocumento" readonly />
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Card de Comprobante -->
+                        <!-- Card de Comprobante -->
+
+                        <!-- Card de Pago -->
+                        <!-- Card de Pago y Totales -->
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Total</h5>
+
+
+
+
+
+
+
+                                <div class="form-group">
+                                    <label>Total General</label>
+                                    <label>@totalGeneralVenta?.ToString("N2") PYG</label>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <br>
+
+                            <button class="btn btn-primary" >Finalizar</button>
+                        
+
+
+
+                    </div>
+
+                </div>
+            </div>
+        }
+
+    </div>
+
+
+</div>
+
+@code {
+    // Propiedades
+    [Inject]
+    private HttpClient http { get; set; }
+    [Inject] NavigationManager navigation { get; set; }
+    private decimal valorPago = 0;
+    private string codigoBarras;
+    private List<DetalleCompraCreateDTO> productosEncontrados;
+    private List<SharedProject.Models.Producto> productosReales;
+    private bool codigoBarrasEncontrado;
+    private bool productoEncontradoEncontrado;
+    ProveedorViewDTO clienteSeleccionado = new ProveedorViewDTO();
+    string documentoBusqueda = "";
+    public decimal? totalGeneralVenta = 0;
+    public SharedProject.Models.Producto ProductoItem { get; set; }
+    public string Comprobante { get; set; } 
+    public decimal Cantidad { get; set; }
+    public decimal Valor{get;set;}
+    List<ProveedorViewDTO> listaClientes = new List<ProveedorViewDTO>
+    {
+
+    };
+
+    public void ActualizarCampoPago()
+    {
+
+    }
+    public void ActualizarCampoProveedor(ChangeEventArgs e)
+    {
+        documentoBusqueda = e.Value.ToString();
+    }
+    public async void HandleKeyDownProveedor(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await BuscarProveedor();
+        }
+    }
+    public void ActualizarCampo(ChangeEventArgs e)
+    {
+
+        codigoBarras = e.Value.ToString();    
+
+    }
+    public async void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await Buscar();
+        }
+    }
+    public async Task BuscarProveedor()
+    {
+        var res = await http.GetFromJsonAsync<ProveedorViewDTO>($"{SharedProject.Api.url}/Proveedor/documento/{documentoBusqueda}");
+        if (res != null)
+            clienteSeleccionado = res;
+
+    }
+    public async Task<SharedProject.Models.Producto> GetByBarCode(string barCode)
+    {
+        try
+        {
+
+            var result = await http.GetAsync($"{SharedProject.Api.url}/Producto/barCode/Compra/{barCode}");
+            var j = await result.Content.ReadAsStringAsync();
+            var teste = Newtonsoft.Json.JsonConvert.DeserializeObject<SharedProject.Models.Producto>(await result.Content.ReadAsStringAsync());
+
+            return teste;
+        }
+        catch (Exception rx)
+        {
+
+            return null;
+        }
+
+    }
+
+    public async Task Buscar()
+    {
+         ProductoItem = await GetByBarCode(codigoBarras);
+
+
+    }
+
+    // Función para mostrar alertas de error
+    private async Task ShowError(string mensaje, string titulo)
+    {
+        await new Utils.Functions(runtime, swal).ShowError(mensaje, titulo);
+    }
+
+
+    // Método que se llama al iniciar el componente
+    protected override async void OnInitialized()
+    {
+        var initciar= await http.GetFromJsonAsync<ProveedorViewDTO>($"{SharedProject.Api.url}/Proveedor/documento/aa");
+        if (initciar != null)
+            clienteSeleccionado = initciar;
+
+    }
+}
+
