@@ -1,0 +1,46 @@
+﻿@page "/comprobante/Compra/imprimir/{Id:int}"
+@using SharedProject.Models
+@inject IJSRuntime runtime
+@inject HttpClient http
+@inject SweetAlertService swl
+
+
+
+<ComprobanteCompra Proveedor="@cliente"  Compra="@compra"></ComprobanteCompra>
+
+@code {
+    Proveedor cliente;
+    CompraViewDTO compra;
+
+    bool valorFiscal = false;
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var result = await http.GetAsync($"{SharedProject.Api.url}/Compras/{Id}");
+
+            if (result.IsSuccessStatusCode )
+            {
+                var o = Newtonsoft.Json.JsonConvert.DeserializeObject<CompraViewDTO>(await result.Content.ReadAsStringAsync());
+                compra = o;
+
+
+                var clresult = await http.GetAsync($"{SharedProject.Api.url}/Proveedor/{compra.ProveedorId}");
+                if (clresult.IsSuccessStatusCode)
+                {
+                    var c = Newtonsoft.Json.JsonConvert.DeserializeObject<Proveedor>(await clresult.Content.ReadAsStringAsync());
+                    cliente = c;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            
+            
+        }
+
+    }
+}

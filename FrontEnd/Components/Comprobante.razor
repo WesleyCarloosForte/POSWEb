@@ -1,78 +1,71 @@
 ﻿@page "/factura"
 @using SharedProject.DTOs
-@using SharedProject.Models;
+@using SharedProject.Models
 @inject IJSRuntime JSRuntime
 
 @if (Venta != null && Clientetes != null)
 {
-
-    <div style="width: 48mm; margin: 0 auto; font-size: 10px; text-align: center;" id="tikect">
-        <div style="margin-bottom: 5px;">
-            <label style="font-weight: bold;">Fecha: </label> @Venta.Fecha.ToShortDateString()<br>
-            @if (ValorFiscal)
-            {
-                <label style="font-weight: bold;">Timbrado: </label> @Venta.Timbrado
-
-                <br>
-                <label style="font-weight: bold;">Fecha Inicio Vigencia: </label> @Venta.FechaInicio.Date.ToShortDateString()
-
-                <br>
-                <label style="font-weight: bold;">Fecha Fin Vigencia: </label> @Venta.FechaFin.Date.ToShortDateString()
-
-                <br>
-            }
-            <label></label> @SharedProject.Models.Empresa.Nombre.<br>
-            <label style="font-weight: bold;">Sucursal: </label> @SharedProject.Models.Empresa.Sucursal<br>
-            <label></label> @SharedProject.Models.Empresa.Direccion<br>
-            <label></label> @SharedProject.Models.Empresa.Rubro<br>
-            <label style="font-weight: bold;">Número de @Venta.Comprobante.Descripcion: </label> @Venta.Comprobante.Descripcion.FirstOrDefault()-@Venta.Establecimiento-@Venta.PuntoExpedicion-@Venta.NumeroComprobante<br>
-            <label style="font-weight: bold;">Condición de Pago: </label> Efectivo<br>
-            <label style="font-weight: bold;">Timbrado: </label> @Venta.Timbrado<br>
-            <label style="font-weight: bold;">RUC: </label> @SharedProject.Models.Empresa.Ruc<br>
-            <label style="font-weight: bold;">RUC Cliente: </label> @Clientetes.DatosGenerales.NumeroDocumento<br>
-            <label style="font-weight: bold;">Cliente: </label> @Clientetes.DatosGenerales.Nombre<br>
-        </div>
-        <div style="margin-top: 10px; max-width: 48mm;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                <div style="width: 35%; text-align: left; font-weight: bold;">Item</div>
-                <div style="width: 20%; text-align: center; font-weight: bold;">Cant</div>
-                <div style="width: 25%; text-align: center; font-weight: bold;">Unit</div>
-                <div style="width: 20%; text-align: center; font-weight: bold;">Tot</div>
+    <div>
+        <div style="width: 48mm; margin: 0 auto; font-size: 10px; text-align: center;" id="tikect">
+            <div style="margin-bottom: 5px;">
+                <label style="font-weight: bold;">Fecha: </label> @Venta.Fecha.ToShortDateString()<br>
+                @if (ValorFiscal)
+                {
+                    <label style="font-weight: bold;">Timbrado: </label> @Venta.Timbrado
+                    <br>
+                    <label style="font-weight: bold;">Fecha Inicio Vigencia: </label> @Venta.FechaInicio.Date.ToShortDateString()
+                    <br>
+                    <label style="font-weight: bold;">Fecha Fin Vigencia: </label> @Venta.FechaFin.Date.ToShortDateString()
+                    <br>
+                }
+                <label></label> @SharedProject.Models.Empresa.Nombre.<br>
+                <label style="font-weight: bold;">Sucursal: </label> @SharedProject.Models.Empresa.Sucursal<br>
+                <label></label> @SharedProject.Models.Empresa.Direccion<br>
+                <label></label> @SharedProject.Models.Empresa.Rubro<br>
+                <label style="font-weight: bold;">Número de @Venta.Comprobante.Descripcion: </label> @Venta.Comprobante.Descripcion.FirstOrDefault()-@Venta.Establecimiento-@Venta.PuntoExpedicion-@Venta.NumeroComprobante<br>
+                <label style="font-weight: bold;">Condición de Pago: </label> Efectivo<br>
+                <label style="font-weight: bold;">Timbrado: </label> @Venta.Timbrado<br>
+                <label style="font-weight: bold;">RUC: </label> @SharedProject.Models.Empresa.Ruc<br>
+                <label style="font-weight: bold;">RUC Cliente: </label> @Clientetes.DatosGenerales.NumeroDocumento<br>
+                <label style="font-weight: bold;">Cliente: </label> @Clientetes.DatosGenerales.Nombre<br>
             </div>
-            @foreach (var item in Venta.DetallesVenta)
-            {
-
-                <div style="display: flex; justify-content: space-between; margin-bottom: 5px; max-width: 48mm; ">
-                    <div style="width: 60%; text-align: left; max-width: 48mm; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@item.Producto</div>
-                    <div style="width: 10%; text-align: center;">@item.Cantidad.ToString("N0")</div>
-                    <div style="width: 15%; text-align: center;">@item.PrecioVenta.ToString("N0")</div>
-                    <div style="width: 15%; text-align: center;">@item.TotalVenta.ToString("N0")</div>
+            <div style="margin-top: 10px; max-width: 48mm;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <div style="width: 35%; text-align: left; font-weight: bold;">Item</div>
+                    <div style="width: 20%; text-align: center; font-weight: bold;">Cant</div>
+                    <div style="width: 25%; text-align: center; font-weight: bold;">Unit</div>
+                    <div style="width: 20%; text-align: center; font-weight: bold;">Tot</div>
                 </div>
-            }
+                @foreach (var item in Venta.DetallesVenta)
+                {
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px; max-width: 48mm; ">
+                        <div style="width: 60%; text-align: left; max-width: 48mm; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@item.Producto</div>
+                        <div style="width: 10%; text-align: center;">@item.Cantidad.ToString("N0")</div>
+                        <div style="width: 15%; text-align: center;">@item.PrecioVenta.ToString("N0")</div>
+                        <div style="width: 15%; text-align: center;">@item.TotalVenta.ToString("N0")</div>
+                    </div>
+                }
                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px; max-width: 48mm; border-top-width:1px;  border: dashed; border-color:black;"></div>
+            </div>
+            <div style="max-width: 48mm; text-align: center; margin-top: 20px;">
+                <label style="font-weight: bold;">Sub Total 5%: </label> 0<br>
+                <label style="font-weight: bold;">Sub Total 10%: </label> @Venta.TotalCompra<br>
+                <label style="font-weight: bold;">Total General: </label> @Venta.TotalCompra<br>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px; max-width: 48mm; border-top-width:1px;  border: dashed; border-color:black;"></div>
+            <div style="max-width: 48mm; text-align: center; margin-top: 20px;">
+                ¡Gracias por su compra!
+            </div>
         </div>
-        <div style="max-width: 48mm; text-align: center; margin-top: 20px;">
-            <label style="font-weight: bold;">Sub Total 5%: </label> 0<br>
-            <label style="font-weight: bold;">Sub Total 10%: </label> @Venta.TotalCompra<br>
-            <label style="font-weight: bold;">Total General: </label> @Venta.TotalCompra<br>
-        </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 5px; max-width: 48mm; border-top-width:1px;  border: dashed; border-color:black;"></div>
-        <div style="max-width: 48mm; text-align: center; margin-top: 20px;">
-            ¡Gracias por su compra!
-        </div>
-    </div>
-
         <button class="btn btn-primary" @onclick="ImprimirComprobante">Imprimir</button>
-
-
+    </div>
 }
-
 
 @code {
     [Parameter]
-    public VentaViewDTO Venta { get; set; } 
+    public VentaViewDTO Venta { get; set; }
     [Parameter]
-    public Cliente Clientetes { get; set; } 
+    public Cliente Clientetes { get; set; }
     [Parameter]
     public bool ValorFiscal { get; set; }
 
@@ -80,12 +73,12 @@
     private string Telefono = "telefono teste";
     private string Ruc = "0111122";
     public decimal getIva() => (Venta.TotalCompra.GetValueOrDefault() * 10) / 100;
-    public decimal getSinIva() => Venta.TotalCompra.GetValueOrDefault()-((Venta.TotalCompra.GetValueOrDefault() * 10) / 100);
+    public decimal getSinIva() => Venta.TotalCompra.GetValueOrDefault() - ((Venta.TotalCompra.GetValueOrDefault() * 10) / 100);
     private bool Imprimir = false;
 
-    private async Task  ActualizarCampo()
+    private async Task ActualizarCampo()
     {
-
+        // Código para actualizar campos
     }
 
     private async Task HandleKeyDown(KeyboardEventArgs e)
@@ -93,7 +86,6 @@
         if (e.Key == "I")
         {
             if (Venta != null && Clientetes != null)
-
                 await ImprimirComprobante();
         }
     }
@@ -101,23 +93,17 @@
     private async Task ImprimirComprobante()
     {
         await JSRuntime.InvokeAsync<object>("eval", @"
-        var elementoComprobante = document.getElementById('tikect');
-        var contenido = elementoComprobante.innerHTML;
-        var ventanaImpresion = window.open('', '', 'width=800,height=600');
-        ventanaImpresion.document.open();
-        ventanaImpresion.document.write('<html><head><title>Comprobante</title></head><body>');
-        ventanaImpresion.document.write('<style>@media print { @page { margin: 0; } }</style>');
-        ventanaImpresion.document.write(contenido);
-        ventanaImpresion.document.write('</body></html>');
-        ventanaImpresion.document.close();
-        ventanaImpresion.print();
-        ventanaImpresion.close();
-    ");
+            var elementoComprobante = document.getElementById('tikect');
+            var contenido = elementoComprobante.innerHTML;
+            var ventanaImpresion = window.open('', '', 'width=800,height=600');
+            ventanaImpresion.document.open();
+            ventanaImpresion.document.write('<html><head><title>Comprobante</title></head><body>');
+            ventanaImpresion.document.write('<style>@media print { @page { margin: 0; } }</style>');
+            ventanaImpresion.document.write(contenido);
+            ventanaImpresion.document.write('</body></html>');
+            ventanaImpresion.document.close();
+            ventanaImpresion.print();
+            ventanaImpresion.close();
+        ");
     }
-
-
 }
-
-
-}
-

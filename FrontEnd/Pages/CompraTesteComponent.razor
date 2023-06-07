@@ -1,0 +1,479 @@
+﻿@page "/comtes"
+@using Newtonsoft.Json;
+@using SharedProject.Models;
+@using System.Text.Json;
+@inject IJSRuntime runtime
+@inject SweetAlertService swal
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Crea la interfaz de usuario -->
+            <div class="container">
+                <h3>Frente de Caja</h3>
+
+                <h5>Buscar por código de barras:</h5>
+                <div class="input-group">
+                    <input type="text" class="form-control" @bind="codigoBarras" id="codigoBarrasInput" placeholder="Ingrese el código de barras" @oninput="ActualizarCampo" @onkeydown="@(async (e) => { if (e.Key == "Enter") {  await Buscar(); } })" />
+                </div>
+
+
+                @if (productosEncontrados != null && productosEncontrados.Any())
+                {
+                    <div class="mt-4">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Código</th>
+                                    <th>Producto</th>
+                                    <th>Prec Unit</th>
+                                    <th>Cantidad</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var producto in productosEncontrados)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            <button class="btn btn-danger" @onclick="(() => EliminarProducto(producto.CodigoBarras))"><i class="fas fa-trash"></i> </button>
+                                            <button class="btn btn-primary" @onclick="(() => SumarCantidad(producto))">+</button>
+                                            <button class="btn btn-primary" @onclick="(() => RestarCantidad(producto))">-</button>
+                                        </td>
+                                        <td>@producto.CodigoBarras</td>
+                                        <td>@producto.Descipcion</td>
+                                        <input style="border-color:transparent; border:none;" type="text" class="form-control" @onblur="(() => RecalcularTotales(producto))" @bind="producto.PrecioCompraUnitario" />
+                                        <td>@producto.Cantidad</td>
+
+                                        <td>@CalcularTotal(producto.Cantidad,producto.PrecioCompraUnitario)</td>
+
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else if (codigoBarrasEncontrado && !productoEncontradoEncontrado)
+                {
+                    <div class="mt-4">
+                        <p class="text-danger">Seleccione un producto....</p>
+                    </div>
+                }
+            </div>
+
+        </div>
+        @if (productosEncontrados != null && productosEncontrados.Any())
+        {
+            <div class="col-md-4">
+                <!-- Crea la interfaz de usuario -->
+                <!-- Card principal -->
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Card de Cliente -->
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Cliente</h5>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Ingrese el documento" @oninput="ActualizarCampoCliente" @onkeydown="HandleKeyDownCliente" @bind="documentoBusqueda" />
+                                </div>
+
+                                @if (clienteSeleccionado != null)
+                                {
+                                    <div class="form-group mt-3">
+                                        <label for="nombreCliente">Nombre:</label>
+                                        <input type="text" class="form-control" id="nombreCliente" value="@clienteSeleccionado.DatosGenerales.Nombre" readonly />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="documentoCliente">Documento:</label>
+                                        <input type="text" class="form-control" id="documentoCliente" value="@clienteSeleccionado.DatosGenerales.NumeroDocumento" readonly />
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Card de Comprobante -->
+                        <!-- Card de Comprobante -->
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Comprobante</h5>
+                                <div class="input-group">
+                                    <div class="form-group">
+                                        <label for="documentoCliente">Numero de comprobante:</label>
+                                        <input type="text" class="form-control" id="documentoCliente" value="@comprobante" @oninput="ActualizarCampo1"  />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card de Pago -->
+                        <!-- Card de Pago y Totales -->
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Totales</h5>
+
+
+                                <div class="form-group">
+                                    <label>Total General</label>
+                                    <label>@totalGeneralVenta.ToString("N2") PYG</label>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <br>
+
+                            <button class="btn btn-primary" @onclick="FinalizarVenta">Finalizar</button>
+                        
+
+
+                    </div>
+
+                </div>
+            </div>
+        }
+
+    </div>
+
+
+</div>
+
+@code {
+    // Propiedades
+    [Inject]
+    private HttpClient http { get; set; }
+    [Inject] NavigationManager navigation { get; set; }
+    private decimal valorPago = 0;
+    private string codigoBarras;
+    private List<DetalleCompraCreateDTO> productosEncontrados;
+    private List<SharedProject.Models.Producto> productosReales;
+    private bool codigoBarrasEncontrado;
+    private bool productoEncontradoEncontrado;
+    ProveedorViewDTO clienteSeleccionado = new ProveedorViewDTO();
+    string documentoBusqueda = "";
+    string comprobante = "";
+
+
+    List<ProveedorViewDTO> listaClientes = new List<ProveedorViewDTO>
+    {
+
+    };
+
+    List<NumeracionComprobante> listaComprobantes = new List<NumeracionComprobante>
+    {
+    };
+
+    private void HandleInputBlur(FocusEventArgs e)
+    {
+        CalcularTotales();
+    }
+    private void RecalcularTotales(DetalleCompraCreateDTO producto)
+    {
+        producto.TotalCompra = CalcularTotal(producto.Cantidad, producto.PrecioCompraUnitario);
+        CalcularTotales();
+    }
+    private void ActualizarCampo1(ChangeEventArgs e)
+    {
+        comprobante = e.Value.ToString();
+    }
+
+    int comprobanteSeleccionado = 1;
+
+    async Task FinalizarVenta()
+    {
+        if (productosEncontrados != null && productosEncontrados.Any() && !string.IsNullOrEmpty(comprobante) && !string.IsNullOrWhiteSpace(comprobante))
+        {
+
+        var venta = new CompraCreateDTO()
+                {
+                    NumeroComprobante=comprobante,
+                    ProveedorId = clienteSeleccionado.Id,
+                    DetallesCompra = productosEncontrados,
+                    Estado = true,
+                    Fecha = DateTime.Now,
+                    TotalCompra = totalGeneralVenta
+
+                };
+
+        var data = await http.PostAsJsonAsync($"{SharedProject.Api.url}/Compras", venta);
+
+        if (data.IsSuccessStatusCode)
+        {
+            await new Utils.Functions(runtime, swal).ShowSaved();
+            navigation.NavigateTo($"/");
+
+        }
+        else
+        {
+            await ShowError("Error al registrar la compra", "");
+        }
+
+
+        }
+        else
+        {
+            await ShowError("Ingrese el numero de comprobante", "");
+        }
+    }
+
+    async void BuscarCliente()
+    {
+        clienteSeleccionado = await GetCliente(documentoBusqueda);
+
+        if (clienteSeleccionado == null)
+        {
+            clienteSeleccionado = await GetCliente("000");
+        }
+
+        documentoBusqueda = "";
+        await runtime.InvokeVoidAsync("eval", "document.getElementById('codigoBarrasInput').focus();");
+    }
+
+    // Clase DetalleCompraCreateDTO
+
+    public decimal vuelto = 0;
+    private decimal totalGeneralVenta;
+    private decimal TotalIVa;
+
+    private void CalcularVuelto()
+    {
+        if (valorPago != null && valorPago >= 0)
+        {
+            vuelto = valorPago - totalGeneralVenta;
+        }
+        else
+        {
+            vuelto = 0;
+        }
+    }
+
+    public async Task<SharedProject.Models.Producto> GetByBarCode(string barCode)
+    {
+        try
+        {
+
+            var result = await http.GetFromJsonAsync<SharedProject.Models.Producto>($"{SharedProject.Api.url}/Producto/barCode/compra/{barCode}");
+            return result;
+        }
+        catch (Exception rx)
+        {
+
+            return null;
+        }
+
+    }
+
+    public async Task<SharedProject.DTOs.ProveedorViewDTO> GetCliente(string documento)
+    {
+        try
+        {
+
+            return await http.GetFromJsonAsync<SharedProject.DTOs.ProveedorViewDTO>($"{SharedProject.Api.url}/Proveedor/DOcumento/{documento}");
+
+        }
+        catch (Exception rx)
+        {
+
+            return null;
+        }
+
+    }
+
+
+
+
+    // Método adicional para calcular el total general de la venta y el total de IVA
+    private void CalcularTotales()
+    {
+        totalGeneralVenta = productosEncontrados?.Sum(p => (p.TotalCompra)) ?? 0;
+
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            CalcularVuelto();
+        }
+    }
+    private void HandleKeyDownCliente(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            BuscarCliente();
+        }
+    }
+
+    private void ActualizarCampo(ChangeEventArgs e)
+    {
+        codigoBarras = e.Value.ToString();
+    }
+
+
+    private void ActualizarCampoCliente(ChangeEventArgs e)
+    {
+        documentoBusqueda = e.Value.ToString();
+    }
+    private void ActualizarCampoPago(ChangeEventArgs e)
+    {
+        decimal.TryParse(e.Value.ToString(), out valorPago);
+
+    }
+    private decimal GetTotalSinIVa(decimal iva, decimal total) => total - iva;
+
+    private async Task<bool> VerficiarCantidad(int cantidad, string barCode)
+    {
+        return await Task.FromResult(true);
+
+
+    }
+
+    // Método de búsqueda
+    private async Task Buscar()
+    {
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(codigoBarras) && !string.IsNullOrEmpty(codigoBarras))
+            {
+                var productoExistente = productosEncontrados?.FirstOrDefault(p => p.CodigoBarras == codigoBarras);
+                if (productoExistente != null)
+                {
+                    if (await VerficiarCantidad(Convert.ToInt32(productoExistente.Cantidad + 1), codigoBarras))
+                    {
+                        productoExistente.Cantidad++;
+                        productoExistente.TotalCompra = CalcularTotal(productoExistente.Cantidad, productoExistente.PrecioCompraUnitario);
+                        CalcularTotales();
+
+                    }
+                    else
+                    {
+                        await ShowError("La cantidad supera el stock actual", "");
+                    }
+                }
+                else
+                {
+                    var producto = await GetByBarCode(codigoBarras);
+                    if (producto != null)
+                    {
+                        var detalleVenta = new DetalleCompraCreateDTO
+                            {
+
+                                CompraId = 0,
+                                ProductoId = producto.Id,
+                                CodigoBarras = producto.CodigoBarras,
+                                Descipcion = producto.Descripcion,
+                                PrecioCompraUnitario = producto.PrecioVenta,
+                                Cantidad = 1,
+                                TotalCompra = CalcularTotal(1, producto.PrecioCompra)
+                            };
+
+                        productosEncontrados.Add(detalleVenta);
+                        codigoBarrasEncontrado = true;
+                        productoEncontradoEncontrado = true;
+                        CalcularTotales();
+                    }
+                    else
+                    {
+                        await ShowError("El producto no fue encontrado.", "Error");
+                    }
+                }
+
+
+            }
+            // Limpiar el campo de búsqueda y mantener el enfoque
+            codigoBarras = string.Empty;
+
+            CalcularVuelto();
+        }
+        catch (Exception)
+        {
+
+
+        }
+        // Aquí realizarías la lógica de búsqueda y asignarías los productos encontrados a la lista productosEncontrados
+        // ...
+
+        // Ejemplo de asignación de valores
+
+
+        await runtime.InvokeVoidAsync("eval", "document.getElementById('codigoBarrasInput').focus();");
+    }
+
+
+    // Método para sumar la cantidad
+    private async Task SumarCantidad(DetalleCompraCreateDTO producto)
+    {
+        if (await VerficiarCantidad(Convert.ToInt32(producto.Cantidad + 1), producto.CodigoBarras))
+        {
+            producto.Cantidad++;
+            producto.TotalCompra = CalcularTotal(producto.Cantidad, producto.PrecioCompraUnitario);
+            CalcularTotales();
+        }
+        else await ShowError("La cantidad supera el stock actual", "");
+
+
+    }
+
+    // Método para restar la cantidad
+    private void RestarCantidad(DetalleCompraCreateDTO producto)
+    {
+        if (producto.Cantidad > 1)
+        {
+            producto.Cantidad--;
+            producto.TotalCompra = CalcularTotal(producto.Cantidad, producto.PrecioCompraUnitario);
+        }
+        else
+        {
+            EliminarProducto(producto.CodigoBarras);
+        }
+        CalcularTotales();
+    }
+
+    // Método para calcular el total de venta
+    private decimal CalcularTotal(decimal cantidad, decimal precio)
+    {
+        return precio * cantidad;
+    }
+
+    // Método para calcular el total de compra
+
+
+    // Método para calcular el total de IVA
+    private decimal CalcularTotalIVa(decimal total, int ivaPorcent)
+    {
+
+        return (ivaPorcent * total) / 100;
+    }
+
+    // Método para eliminar un producto de la lista
+    private void EliminarProducto(string codigoBarras)
+    {
+        var item = productosEncontrados.Find(x => x.CodigoBarras == codigoBarras);
+        productosEncontrados.Remove(item);
+        CalcularTotales();
+    }
+
+    // Función para mostrar alertas de error
+    private async Task ShowError(string mensaje, string titulo)
+    {
+        await new Utils.Functions(runtime, swal).ShowError(mensaje, titulo);
+    }
+
+
+    // Método que se llama al iniciar el componente
+    protected override async void OnInitialized()
+    {
+        productosEncontrados = new List<DetalleCompraCreateDTO>();
+        codigoBarras = string.Empty;
+        CalcularTotales();
+        listaClientes = await http.GetFromJsonAsync<List<SharedProject.DTOs.ProveedorViewDTO>>($"{SharedProject.Api.url}/Proveedor");
+
+        if (clienteSeleccionado != null)
+            clienteSeleccionado = listaClientes.FirstOrDefault(x => x.DatosGenerales.Nombre == "Default");
+
+    }
+}
+

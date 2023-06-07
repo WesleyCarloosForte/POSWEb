@@ -8,6 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Components\CustomErrorBoundary.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Components\CustomErrorBoundary.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Blazorise" Version="1.2.3" />
     <PackageReference Include="Blazorise.Bootstrap" Version="1.2.3" />
     <PackageReference Include="CurrieTechnologies.Razor.SweetAlert2" Version="5.5.0" />
@@ -17,15 +25,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Shared\SharedProject.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Components\NewFolder\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shared\SharedProject.csproj" />
   </ItemGroup>
 
 </Project>

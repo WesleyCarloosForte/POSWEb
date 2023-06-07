@@ -6,66 +6,54 @@
 
 
 <div class="row mt-5">
-
-    <div class="col-lg-4 offset-lg-4 border">
-
-        <div class="mb-3 text-center">
-            <h3> Login </h3>
-        </div>
-
+    <div class="col-lg-4 offset-lg-4 border rounded p-4">
+        <h3 class="mb-4 text-center">Login</h3>
         <div class="mb-3">
-            <label>Correo</label>
-            <input @bind="login" class="form-control" />
+            <label for="correo" class="form-label">Login</label>
+            <input id="correo" @bind="login" class="form-control" />
         </div>
-
         <div class="mb-3">
-            <label>Contraseña</label>
-            <input @bind="password" class="form-control" />
+            <label for="contrasena" class="form-label">Contraseña</label>
+            <input id="contrasena" @bind="password" type="password" class="form-control" />
         </div>
-
-        <div class="mb-3">
-            <button @onclick="LoginRes" class="btn btn-primary">Login</button>
+        <div class="text-center">
+            <button @onclick="LoginRes" class="btn btn-primary">Iniciar sesión</button>
         </div>
-
     </div>
-
 </div>
+
+
 @code {
+
     private string login;
     private string password;
 
     [Inject]
     protected IJSRuntime JSRuntime { get; set; }
     [Inject]
+    protected SweetAlertService swl { get; set; }
+    [Inject]
+    protected HttpClient http { get; set; }
+    [Inject]
     protected NavigationManager NavigationManager { get; set; }
 
     public async Task GuardarUsuario(UsuarioViewDTO usuario)
     {
-        var a = new UsuarioViewDTO
-{
-    RolId = 1,
-    Id = 1,
-    DatosGeneralesId = 1,
-    Login = "nombreusuario",
-    Password = "contrasena",
-    Rol = new Rol { Id = 1, Descripcion = "Administrador" },
-    DatosGenerales = new DatosGenerales
-    {
-        Id = 1,
-        Nombre = "Nombre ficticio",
-        Direccion = "Dirección ficticia",
-        Telefono = "123456789",
-        Email = "correo@ejemplo.com",
-        NumeroDocumento = "1234567890",
-        Estado = true,
-        DocumentoId = 1,
-        Documento = new Documento { Id = 1, Descripcion = "Documento ficticio" }
-    }
-};
+        try
+        {
 
-        await RemoverUsuario();
-        string usuarioJson = System.Text.Json.JsonSerializer.Serialize(a);
-        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "Usuario", usuarioJson);
+            await RemoverUsuario();
+            string usuarioJson = System.Text.Json.JsonSerializer.Serialize(usuario);
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "Usuario", usuarioJson);
+
+        }
+        catch (Exception)
+        {
+
+            await new Utils.Functions(JSRuntime, swl).ShowError("Error al guardar", "Error");
+        }
+
+
     }
 
     public async Task RemoverUsuario()
@@ -80,16 +68,42 @@
 
     private async Task LoginRes()
     {
-        var validationContext = new ValidationContext(this);
-        var validationResults = new List<ValidationResult>();
+        try
+        {
+            var a = await http.PostAsJsonAsync($"{SharedProject.Api.url}/Usuario/Login", new UsuarioViewDTO { Login = login, Password = password });
+            if (a.IsSuccessStatusCode)
+            {
 
-        await GuardarUsuario(new UsuarioViewDTO());
+
+                var us = Newtonsoft.Json.JsonConvert.DeserializeObject<UsuarioViewDTO>(await a.Content.ReadAsStringAsync());
+
+
+                await GuardarUsuario(us);
+                if (us.RolId == 1)
+                {
+                    AppState.ShowMenu();
+                }
+                AppState.ShowSalir();
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                password = string.Empty;
+                await new Utils.Functions(JSRuntime, swl).ShowError("Credenciales invalildas", "Error");
+            }
+        }
+        catch (Exception)
+        {
+            password = string.Empty;
+            await new Utils.Functions(JSRuntime, swl).ShowError("Credenciales invalildas", "Error");
+        }
+
 
         // Aquí puedes agregar la lógica para autenticar al usuario
         // utilizando el valor de "login" y "password"
 
         // Redirigir a la página principal después de iniciar sesión
-        NavigationManager.NavigateTo("/");
+       
     }
 /**
     public async Task<UsuarioViewDTO> ValidarCredenciales()

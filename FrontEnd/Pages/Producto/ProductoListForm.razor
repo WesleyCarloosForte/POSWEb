@@ -3,8 +3,12 @@
 @inject IJSRuntime js
 @using Microsoft.AspNetCore.Components.Forms
 @inject SweetAlertService swl;
+@inject NavigationManager nav;
 @using SharedProject.Models;
 <h3>Producto</h3>
+
+<button class="btn btn-primary my-2" @onclick="MostrarProductosSinStock"><i class="fas fa-exclamation-triangle"></i> &nbsp;Bajo stock</button>
+<button class="btn btn-info my-2" @onclick="MostrarProductosEnStock"><i class="fas fa-list"></i>&nbsp;Productos en Stock</button>
 
 <div class="input-group my-2 align-items-center">
     <div class="input-group-prepend">
@@ -62,6 +66,9 @@ else
                         <button class="btn btn-danger" @onclick="(() => Delete(producto.Id))">
                             <i class="fas fa-trash-alt"></i>
                         </button>
+                        <a class="btn btn-secondary" href="reporte-kardex/@producto.Id">
+                            K
+                        </a>
                     </td>
                 </tr>
             }
@@ -79,8 +86,32 @@ else
     string txt = "";
     protected override async Task OnInitializedAsync()
     {
-        await LoadProducto();
+        try
+        {
+            await LoadProducto();
+        }
+        catch (Exception)
+        {
+
+
+        }
+        
     }
+
+    void MostrarProductosSinStock()
+    {
+        nav.NavigateTo("reporte-productos/bajos");
+
+
+    }
+
+    void MostrarProductosEnStock()
+    {
+        nav.NavigateTo("reporte-productos");
+
+
+    }
+
     async Task LoadProducto()
     {
         Producto = await http.GetFromJsonAsync<Producto[]>($"{SharedProject.Api.url}/Producto");
@@ -96,6 +127,12 @@ else
                 await new Utils.Functions(js, swl).ShowError("No fue posible eliminar el registro", "Error");
 
         }
+
+    }
+
+    async Task ViewKardexx(int id)
+    {
+
 
     }
 

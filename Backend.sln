@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedProject", "Shared\Sha
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FrontEnd", "FrontEnd\FrontEnd.csproj", "{452F591A-16C9-4449-A86B-3AB95F0C31A2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CajaBlancaXunit", "CajaBlancaXunit\CajaBlancaXunit.csproj", "{C613A6C2-FB97-4C4D-A1D6-B103FC1D9F97}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{452F591A-16C9-4449-A86B-3AB95F0C31A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{452F591A-16C9-4449-A86B-3AB95F0C31A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{452F591A-16C9-4449-A86B-3AB95F0C31A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C613A6C2-FB97-4C4D-A1D6-B103FC1D9F97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C613A6C2-FB97-4C4D-A1D6-B103FC1D9F97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C613A6C2-FB97-4C4D-A1D6-B103FC1D9F97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C613A6C2-FB97-4C4D-A1D6-B103FC1D9F97}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

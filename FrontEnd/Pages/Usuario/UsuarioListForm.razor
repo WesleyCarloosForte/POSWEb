@@ -69,7 +69,16 @@ else
     string txt = "";
     protected override async Task OnInitializedAsync()
     {
-        await LoadUsuarios();
+        try
+        {
+            await LoadUsuarios();
+        }
+        catch (Exception)
+        {
+            
+           
+        }
+        
     }
     async Task LoadUsuarios()
     {

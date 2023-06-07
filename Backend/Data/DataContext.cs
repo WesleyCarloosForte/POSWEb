@@ -50,6 +50,12 @@ namespace Backend.Data
                 .WithMany()
                 .HasForeignKey(dv => dv.ProductoId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<KardexProducto>()
+                .HasOne(dv => dv.Producto)
+                .WithMany()
+                .HasForeignKey(dv => dv.ProductoId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
         public DbSet<Categoria> Categorias { get; set; }
@@ -65,6 +71,7 @@ namespace Backend.Data
         public DbSet<Rol> Roles { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Venta> Ventas { get; set; }
+        public DbSet<KardexProducto> KardexProductos { get; set; }
     }
 }
 

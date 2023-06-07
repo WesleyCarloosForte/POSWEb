@@ -102,6 +102,21 @@ namespace Backend.Controllers
             return CreatedAtAction(nameof(GetUsuario), new { id = usuarioDto.Id }, usuarioDto);
         }
 
+        [HttpPost("Login")]
+        public ActionResult<UsuarioViewDTO> GetLogin(UsuarioViewDTO usuarioDto)
+        {
+           var usuario = _context.Usuarios.Include(x=>x.DatosGenerales).Include(x=>x.Rol).Where(x=>x.Login.ToLower()==usuarioDto.Login.ToLower() && x.Password.ToLower() == usuarioDto.Password.ToLower()).FirstOrDefault();
+
+            if (usuario != null )
+            {
+                var usuarioView= _mapper.Map<UsuarioViewDTO>(usuario);
+                return Ok(usuarioView);
+            }
+            
+
+            else return NotFound();
+        }
+
         [HttpPut("{id}")]
         public async Task< IActionResult> UpdateUsuario(int id, UsuarioCreateDTO usuarioDto)
         {

@@ -1,7 +1,8 @@
 ﻿@inherits LayoutComponentBase
+@using Utils;
 
 <div class="page">
-    @if (MostrarMenu)
+    @if (AppState.IsMenuVisible)
     {
         <div class="sidebar">
             <NavMenu />
@@ -10,13 +11,15 @@
 
 
     <main>
-        @if (MostrarMenu)
+        @if (AppState.IsSalirVisible)
         {
-            <div class="top-row px-4">
-                <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            
+        <div class="top-row px-4">
+                <button @onclick="Delete" target="_blank">Salir</button>
             </div>
-
         }
+
+       
         <article class="content px-4">
             @Body
         </article>
@@ -26,40 +29,53 @@
 
 @code {
     bool MostrarMenu;
+
     UsuarioViewDTO usuario;
     [Inject]
     protected IJSRuntime JSRuntime { get; set; }
-
+    [Inject] protected SweetAlertService swl { get; set; }
 
     [Inject]
     protected NavigationManager NavigationManager { get; set; }
 
-    private async Task<UsuarioViewDTO> LeerUsuarioDesdeLocalStorage()
-    {
-        var usuarioJson = await  JSRuntime.InvokeAsync<string>("localStorage.getItem", "Usuario");
-        if (!string.IsNullOrEmpty(usuarioJson))
-        {
-            return  System.Text.Json.JsonSerializer.Deserialize<UsuarioViewDTO>(usuarioJson);
-        }
-        return null;
-    }
 
+    public async Task Delete()
+    {
+        await new Functions(JSRuntime, swl).EliminarUsuarioDesdeLocalStorage();
+        AppState.HideMenu();
+        AppState.HideSalir();
+        NavigationManager.NavigateTo("/login");
+
+    }
     protected override async Task OnInitializedAsync()
     {
-        // Leer datos del LocalStorage al inicializar el componente
-        usuario= await LeerUsuarioDesdeLocalStorage();
+        try
+        {
+            usuario = await new Functions(JSRuntime, swl).LeerUsuarioDesdeLocalStorage();
 
-        if (usuario == null || usuario.RolId !=1)
-        {
-            MostrarMenu = false;
-            if(usuario==null)
-            NavigationManager.NavigateTo("/login");
+            if (usuario == null)
+            {
+                AppState.HideSalir();
+                AppState.HideMenu();
+                NavigationManager.NavigateTo("/login");
+
+            }
+            else if (usuario != null)
+            {
+                AppState.ShowSalir();
+                if (usuario.RolId == 1)
+                {
+                    AppState.ShowMenu();
+                }
+
+            }
         }
-        else
+        catch (Exception ex)
         {
-            MostrarMenu = true;
-            NavigationManager.NavigateTo("/");
+            
+            
         }
-        await Task.Delay(1000);
+        // Leer datos del LocalStorage al inicializar el componente
+       
     }
 }

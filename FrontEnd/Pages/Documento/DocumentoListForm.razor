@@ -64,7 +64,16 @@ else
     string txt = "";
     protected override async Task OnInitializedAsync()
     {
-        await LoadDocumentos();
+        try
+        {
+            await LoadDocumentos();
+        }
+        catch (Exception)
+        {
+            
+            
+        }
+       
     }
     async Task LoadDocumentos()
     {

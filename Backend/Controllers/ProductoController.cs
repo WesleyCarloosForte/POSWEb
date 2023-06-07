@@ -26,7 +26,28 @@ namespace Backend.Controllers
             var productos = await _productoRepository.GetProductosWithDataFilter();
             return Ok(productos);
         }
+        [HttpGet("bajoStock")]
+        public async Task<ActionResult<IEnumerable<Producto>>> GetBajoStock()
+        {
+            var productos = await _productoRepository.GetProductosWithDataFilter(x => x.StockActual < x.StockMinimo);
+            if(productos== null)
+                return Ok(new List<Producto>());
 
+            return Ok(productos);
+        }
+        [HttpGet("Kardex/{id}")]
+        public async Task<ActionResult<IEnumerable<Producto>>> GetKardex(int id)
+        {
+            var producto = await _productoRepository.GetProductoWithDataKardex(id);
+
+            if (producto == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(producto);
+        }
+        
         [HttpGet("{id}")]
         public async Task<ActionResult<Producto>> Get(int id)
         {
@@ -104,7 +125,7 @@ namespace Backend.Controllers
         }
 
         [HttpPost]
-        public ActionResult<Producto> Post([FromBody] ProductoCreateDTO producto)
+        public async Task<ActionResult<Producto>> Post([FromBody] ProductoCreateDTO producto)
         {
             if (producto == null)
             {
@@ -121,13 +142,13 @@ namespace Backend.Controllers
             StockActual=producto.StockActual,
             StockMinimo= producto.StockMinimo
             };
-                _productoRepository.Add(p);
+               await _productoRepository.AddAsync(p,0);
             
             return CreatedAtAction(nameof(Get), new { id = producto.Id }, producto);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] ProductoCreateDTO producto)
+        public async Task<IActionResult> Put(int id, [FromBody] ProductoCreateDTO producto)
         {
             if (producto == null || id != producto.Id)
             {
@@ -148,7 +169,7 @@ namespace Backend.Controllers
             existingProducto.StockActual = producto.StockActual;
             existingProducto.StockMinimo = producto.StockMinimo;
 
-            _productoRepository.Update(existingProducto);
+          await  _productoRepository.AddAsync(existingProducto,1);
             return NoContent();
         }
 

@@ -1,0 +1,26 @@
+﻿@page "/ReportForm"
+@using FrontEnd.Components.Reportes
+<button class="btn btn-primary my-2" @onclick="MostrarProductosSinStock"><i class="fas fa-exclamation-triangle"></i> &nbsp;Bajo stock</button>
+<button class="btn btn-info my-2" @onclick="MostrarProductosEnStock"><i class="fas fa-list"></i>&nbsp;Productos en Stock</button>
+@code {
+    [Inject]
+    NavigationManager nav { get; set; }
+
+
+    void MostrarProductosSinStock()
+    {
+        nav.NavigateTo("reporte-productos/bajos");
+
+
+    }
+
+    void MostrarProductosEnStock()
+    {
+        nav.NavigateTo("reporte-productos");
+
+       
+    }
+
+
+
+}

@@ -12,10 +12,19 @@
     <nav class="flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
+                <span class="fas fa-shopping-cart" aria-hidden="true"></span> &nbsp;Frente de caja
             </NavLink>
         </div>
-
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="Venta/list">
+                <span class="fas fa-box-open" aria-hidden="true"></span>&nbsp;Ventas Realizadas
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="Compra/lista">
+                <span class="fas fa-box-open" aria-hidden="true"></span>&nbsp;Compras Realizadas
+            </NavLink>
+        </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="categoria/list">
                 <span class="fas fa-list" aria-hidden="true"></span>&nbsp;Categorías
@@ -33,6 +42,7 @@
                 <span class="fas fa-file-alt" aria-hidden="true"></span>&nbsp;Documentos
             </NavLink>
         </div>
+
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="comprobante/list">
@@ -63,18 +73,14 @@
                 <span class="fas fa-box-open" aria-hidden="true"></span>&nbsp;Productos
             </NavLink>
         </div>
+  
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Factura">
-                <span class="fas fa-box-open" aria-hidden="true"></span>&nbsp;Facturas
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Compras">
+            <NavLink class="nav-link" href="comtes">
                 <span class="fas fa-box-open" aria-hidden="true"></span>&nbsp;Compras
             </NavLink>
         </div>
+
 
     </nav>
 </div>
@@ -87,6 +93,13 @@
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    private bool isMenuOpen = false;
+
+    private void ToggleMenu()
+    {
+        isMenuOpen = !isMenuOpen;
     }
 
 }

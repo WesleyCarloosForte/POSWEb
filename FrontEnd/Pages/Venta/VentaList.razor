@@ -1,0 +1,124 @@
+﻿@page "/Venta/list"
+@inject HttpClient http
+@inject IJSRuntime js
+@using Microsoft.AspNetCore.Components.Forms
+@inject SweetAlertService swl;
+@using SharedProject.DTOs;
+<h3>Ventas</h3>
+
+<div class="input-group my-2 align-items-center">
+    <div class="input-group-prepend">
+        <span class="input-group-text" style="margin-right: 5px;"><i class="fas fa-search"></i></span>
+    </div>
+    <input type="text" class="form-control px-2" placeholder="Buscar" @bind="txt" @onkeydown="SearchKeyPress" />
+    <div class="input-group-append" style="margin-left: 5px;">
+        <button class="btn btn-primary ml-2" type="button" @onclick="(()=>Buscar(txt))">Buscar</button>
+    </div>
+</div>
+
+
+@if (Ventas == null)
+{
+    <text>Cargando...</text>
+}
+else if (Ventas.Length == 0)
+{
+    <text>No hay ventas en la base de datos!</text>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th hidden>Id</th>
+                <th>Comprobante</th>
+                <th>Nro Comprobante</th>
+                <th>Cliente</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var venta in Ventas)
+            {
+                <tr>
+                    <td hidden>@venta.Id</td>
+                    <td>@($"{venta.Comprobante.Descripcion}") </td>
+                    <td >@($"{venta.Establecimiento}-{venta.PuntoExpedicion}-{venta.NumeroComprobante}") </td>
+                    <td>@venta.Cliente.DatosGenerales.Nombre</td>
+                    <td>@venta.Fecha.ToShortDateString()</td>
+                    <td>@string.Format("{0:N2}", venta.TotalCompra)</td>
+                    <td>@(venta.Estado == true ? "Activo" : "Anulado")</td>
+                    <td>
+                        <button class="btn btn-danger" @onclick="(() => Delete(venta.Id))">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        <a class="btn btn-secondary" href="/comprobante/imprimir/@venta.Id">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+
+@code {
+    private Components.Modals.ConfirmationModal confirmationModal;
+    VentaViewDTO[] Ventas { get; set; }
+
+    string txt = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await LoadVentas();
+        }
+        catch (Exception)
+        {
+            // Manejo de errores
+        }
+    }
+
+    async Task LoadVentas()
+    {
+        var test = await http.GetFromJsonAsync<List<VentaViewDTO>>($"{SharedProject.Api.url}/Venta");
+        Ventas = test.ToArray();
+    }
+
+    async Task Delete(int id)
+    {
+        if (await new Utils.Functions(js, swl).ShowConfirmation("¿Deseas Anular la venta?", "Confirmar"))
+        {
+            var response = await http.DeleteAsync($"{SharedProject.Api.url}/Venta/{id}");
+            if (response.IsSuccessStatusCode)
+                await LoadVentas();
+            else
+                await new Utils.Functions(js, swl).ShowError("No fue posible anular la venta", "Error");
+        }
+    }
+
+    private async void SearchKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await Buscar(txt);
+        }
+    }
+
+    async Task Buscar(string txt)
+    {
+        if (string.IsNullOrEmpty(txt) || string.IsNullOrWhiteSpace(txt))
+            await LoadVentas();
+        else
+        {
+            var a = await http.GetFromJsonAsync<IEnumerable<VentaViewDTO>>($"{SharedProject.Api.url}/Venta/filter/{txt}");
+            Ventas = a.ToArray();
+        }
+    }
+}

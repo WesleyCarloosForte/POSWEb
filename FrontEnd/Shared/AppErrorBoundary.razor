@@ -1,0 +1,17 @@
+﻿// AppErrorBoundary.razor
+
+<div>
+    @ChildContent
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+
+    private void HandleError(Exception error)
+    {
+        // Personaliza el manejo de errores aquí si lo deseas
+        // Por ejemplo, puedes registrar el error en un servicio de registro de errores o enviar una notificación al usuario.
+    }
+}

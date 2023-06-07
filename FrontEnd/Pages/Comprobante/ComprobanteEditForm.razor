@@ -34,7 +34,16 @@
         // Llama al método base para realizar las operaciones por defecto
         await base.OnParametersSetAsync();
 
-        comprobante = await http.GetFromJsonAsync<NumeracionComprobante>($"{SharedProject.Api.url}/NumeracionComprobante/{Id}");
+        try
+        {
+            comprobante = await http.GetFromJsonAsync<NumeracionComprobante>($"{SharedProject.Api.url}/NumeracionComprobante/{Id}");
+        }
+        catch (Exception)
+        {
+            
+           
+        }
+        
 
 
     }

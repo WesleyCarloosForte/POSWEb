@@ -226,6 +226,61 @@ namespace Backend.Migrations
                     b.ToTable("Documentos");
                 });
 
+            modelBuilder.Entity("SharedProject.Models.KardexProducto", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("CantidadMovimiento")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Descripcioin")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("Fecha")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<decimal>("GananciaEsperada")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<decimal>("GananciaUnitaria")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<string>("NumeroComprobante")
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("PrecioUnitario")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<int>("ProductoId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Tipo")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("TipoComprobante")
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("Valor")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<decimal>("ValorCompra")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<int>("stockActual")
+                        .HasColumnType("int");
+
+                    b.Property<int>("stockAnterior")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductoId");
+
+                    b.ToTable("KardexProductos");
+                });
+
             modelBuilder.Entity("SharedProject.Models.NumeracionComprobante", b =>
                 {
                     b.Property<int>("Id")
@@ -479,6 +534,17 @@ namespace Backend.Migrations
                     b.Navigation("Producto");
 
                     b.Navigation("Venta");
+                });
+
+            modelBuilder.Entity("SharedProject.Models.KardexProducto", b =>
+                {
+                    b.HasOne("SharedProject.Models.Producto", "Producto")
+                        .WithMany()
+                        .HasForeignKey("ProductoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Producto");
                 });
 
             modelBuilder.Entity("SharedProject.Models.Producto", b =>

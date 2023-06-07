@@ -2,6 +2,8 @@ using Blazorise;
 using Blazorise.Bootstrap;
 using CurrieTechnologies.Razor.SweetAlert2;
 using FrontEnd;
+using FrontEnd.Shared;
+using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -16,4 +18,8 @@ builder.Services.AddBlazorise(options =>
   
 })
 .AddBootstrapProviders();
+
+builder.Services.AddScoped<INavigationInterception, CustomNavigationInterceptor>();
+
+
 await builder.Build().RunAsync();

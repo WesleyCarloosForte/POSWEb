@@ -69,7 +69,16 @@ else
     }
     async Task LoadComprobantes()
     {
-        Comprobantes = await http.GetFromJsonAsync<NumeracionComprobante[]>($"{SharedProject.Api.url}/NumeracionComprobante");
+        try
+        {
+            Comprobantes = await http.GetFromJsonAsync<NumeracionComprobante[]>($"{SharedProject.Api.url}/NumeracionComprobante");
+        }
+        catch (Exception)
+        {
+            
+           
+        }
+        
     }
     async Task Delete(int id)
     {
@@ -100,8 +109,17 @@ else
             await LoadComprobantes();
         else
         {
-            var a = await http.GetFromJsonAsync<IEnumerable<NumeracionComprobante>>($"{SharedProject.Api.url}/NumeracionComprobante/filter/{txt}");
+            try
+            {
+                 var a = await http.GetFromJsonAsync<IEnumerable<NumeracionComprobante>>($"{SharedProject.Api.url}/NumeracionComprobante/filter/{txt}");
             Comprobantes = a.ToArray();
+            }
+            catch (Exception)
+            {
+                
+                
+            }
+
         }
       
     }

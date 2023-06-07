@@ -1,0 +1,21 @@
+﻿<ErrorBoundary>
+    <CascadingValue Value="this">
+        <div class="error-boundary-content">
+            @ChildContent
+        </div>
+    </CascadingValue>
+</ErrorBoundary>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    public void HandleError(Exception exception)
+    {
+        // Personaliza el manejo de errores aquí si lo deseas
+
+        // Por ejemplo, puedes registrar el error en un servicio de registro de errores o enviar una notificación al usuario.
+
+        // Si no deseas mostrar ninguna información de error al usuario, simplemente no realices ninguna acción aquí.
+    }
+}

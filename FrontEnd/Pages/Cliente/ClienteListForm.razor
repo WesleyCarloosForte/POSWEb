@@ -68,7 +68,16 @@ else
     string txt = "";
     protected override async Task OnInitializedAsync()
     {
-        await LoadCliente();
+        try
+        {
+            await LoadCliente();
+        }
+        catch (Exception)
+        {
+
+
+        }
+        
     }
     async Task LoadCliente()
     {

@@ -43,7 +43,7 @@ namespace Backend.Controllers
         }
 
 
-        [HttpGet("documento/{documento}")]
+        [HttpGet("DOcumento/{documento}")]
         public async Task<ActionResult<ProveedorViewDTO>> GetCliente(string documento)
         {
             try

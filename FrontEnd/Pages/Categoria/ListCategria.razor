@@ -65,7 +65,16 @@ else
     string txt="";
     protected override async Task OnInitializedAsync()
     {
-        await LoadCategorias();
+        try
+        {
+            await LoadCategorias();
+        }
+        catch (Exception)
+        {
+            
+            
+        }
+        
     }
     async Task LoadCategorias()
     {

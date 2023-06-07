@@ -197,7 +197,7 @@
         else
         {
 
-        var venta = new CreateVentaDTO()
+            var venta = new CreateVentaDTO()
             { ClienteId = clienteSeleccionado.Id,
                 ComprobanteId = comprobanteSeleccionado,
                 DetallesVenta = productosEncontrados,
@@ -207,25 +207,25 @@
 
             };
 
-        VentaViewDTO ven = new VentaViewDTO() { Id=0};
-        var data = await http.PostAsJsonAsync($"{SharedProject.Api.url}/Venta",venta);
+            VentaViewDTO ven = new VentaViewDTO() { Id=0};
+            var data = await http.PostAsJsonAsync($"{SharedProject.Api.url}/Venta",venta);
 
-        if (data.IsSuccessStatusCode)
-        {
-            // Lee el contenido de la respuesta como una cadena de texto
-            string content = await data.Content.ReadAsStringAsync();
+            if (data.IsSuccessStatusCode)
+            {
+                // Lee el contenido de la respuesta como una cadena de texto
+                string content = await data.Content.ReadAsStringAsync();
 
-            // Deserializa el contenido en un objeto utilizando JsonSerializer
-            ven = JsonConvert.DeserializeObject<VentaViewDTO>(content);
+                // Deserializa el contenido en un objeto utilizando JsonSerializer
+                ven = JsonConvert.DeserializeObject<VentaViewDTO>(content);
 
-            // Ahora puedes trabajar con el objeto deserializado
+                // Ahora puedes trabajar con el objeto deserializado
             // ...
-        }
-        if (ven.Id != 0)
-            navigation.NavigateTo($"/comprobante/imprimir/{ven.Id}");
-        else
-            await ShowError("No fue posible registrar la venta", "");
-                        
+            }
+            if (ven.Id != 0)
+                navigation.NavigateTo($"/comprobante/imprimir/{ven.Id}");
+            else
+                await ShowError("No fue posible registrar la venta", "");
+
         }
     }
 
@@ -270,7 +270,7 @@
         }
         catch (Exception rx)
         {
-            
+
             return null;
         }
 
@@ -282,7 +282,7 @@
         {
 
             return await http.GetFromJsonAsync<SharedProject.DTOs.ClienteViewDTO>($"{SharedProject.Api.url}/Clientes/DOcumento/{documento}");
-            
+
         }
         catch (Exception rx)
         {
@@ -298,7 +298,7 @@
         {
 
             return await http.GetFromJsonAsync<SharedProject.Models.NumeracionComprobante>($"{SharedProject.Api.url}/NumeracionComprobante/{documento}");
- 
+
         }
         catch (Exception rx)
         {
@@ -393,7 +393,7 @@
                         var detalleVenta = new CreateDetalleVentaDTO
                             {
                                 Id = producto.Id,
-                                VentaId = 1,
+                                VentaId = 0,
                                 ProductoId = producto.Id,
                                 CodigoBarras = producto.CodigoBarras,
                                 Descripcion = producto.Descripcion,
@@ -427,20 +427,16 @@
         }
         catch (Exception)
         {
-            
-            
+
+
         }
         // Aquí realizarías la lógica de búsqueda y asignarías los productos encontrados a la lista productosEncontrados
         // ...
 
         // Ejemplo de asignación de valores
-        
+
 
         await runtime.InvokeVoidAsync("eval", "document.getElementById('codigoBarrasInput').focus();");
-    }
-    private async Task HolaMundo(string texto)
-    {
-        var a = texto.Split("");
     }
 
     // Método para sumar la cantidad
@@ -510,14 +506,26 @@
     // Método que se llama al iniciar el componente
     protected override async void OnInitialized()
     {
-        productosEncontrados = new List<CreateDetalleVentaDTO>();
-        codigoBarras = string.Empty;
-        CalcularTotales();
-        listaComprobantes = await http.GetFromJsonAsync<List<SharedProject.Models.NumeracionComprobante>>($"{SharedProject.Api.url}/NumeracionComprobante");
-        listaClientes = await http.GetFromJsonAsync<List<SharedProject.DTOs.ClienteViewDTO>>($"{SharedProject.Api.url}/Clientes");
 
-        if(clienteSeleccionado!=null)
-        clienteSeleccionado = listaClientes.FirstOrDefault(x => x.DatosGenerales.Nombre == "Default");
+        try
+        {
+            productosEncontrados = new List<CreateDetalleVentaDTO>();
+            codigoBarras = string.Empty;
+            CalcularTotales();
+            listaComprobantes = await http.GetFromJsonAsync<List<SharedProject.Models.NumeracionComprobante>>($"{SharedProject.Api.url}/NumeracionComprobante");
+            listaClientes = await http.GetFromJsonAsync<List<SharedProject.DTOs.ClienteViewDTO>>($"{SharedProject.Api.url}/Clientes");
+
+            if (clienteSeleccionado != null)
+                clienteSeleccionado = listaClientes.FirstOrDefault(x => x.DatosGenerales.Nombre == "Default");
+            if (listaComprobantes != null)
+                comprobanteSeleccionado = listaComprobantes.FirstOrDefault().Id;
+        }
+        catch (Exception)
+        {
+            
+            
+        }
+       
 
     }
 }
