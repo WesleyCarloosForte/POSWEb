@@ -1,8 +1,70 @@
 ﻿@using Newtonsoft.Json;
 @using SharedProject.Models;
 @using System.Text.Json;
-@inject IJSRuntime runtime
-@inject SweetAlertService swal
+@inject IJSRuntime js
+@inject SweetAlertService swl
+
+<div style="display: @(showModal ? "block" : "none"); position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.4);">
+    <div style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h5 style="margin: 0;">Lista de Nombres</h5>
+            <button type="button" style="background: none; border: none; cursor: pointer; font-size: 24px; font-weight: bold; color: #000;" @onclick="HideModal">&times;</button>
+        </div>
+        <div>
+            <h3>Cliente</h3>
+
+            <div class="input-group my-2 align-items-center">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" style="margin-right: 5px;"><i class="fas fa-search"></i></span>
+                </div>
+                <input type="text" class="form-control px-2" placeholder="Buscar" @bind="@txt" />
+                <div class="input-group-append" style="margin-left: 5px;">
+                    <button class="btn btn-primary ml-2" type="button" @onclick="(() => Buscar(txt))">Buscar</button>
+                </div>
+            </div>
+
+            @if (Clientes == null)
+            {
+                <text>Cargando...</text>
+            }
+            else if (Clientes.Length == 0)
+            {
+                <text>No hay categorías en la base de datos.</text>
+            }
+            else
+            {
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th hidden>Id</th>
+                            <th>Nombre</th>
+                            <th>Documento</th>
+                            <th>Tipo de Documento</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var Cliente in Clientes)
+                        {
+                            <tr>
+                                <td hidden>@Cliente.Id</td>
+                                <td>@Cliente.DatosGenerales.Nombre</td>
+                                <td>@Cliente.DatosGenerales.NumeroDocumento</td>
+                                <td>@Cliente.DatosGenerales.Documento.Descripcion</td>
+                                <td>
+                                    <button class="btn btn-success" type="button" @onclick="(()=>SelectName(Cliente))">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
 
 
 <div class="container">
@@ -77,7 +139,8 @@
                             <h5 class="card-title">Cliente</h5>
                             <div class="input-group">
                                     <input type="text" class="form-control" placeholder="Ingrese el documento" @oninput="ActualizarCampoCliente" @onkeydown="HandleKeyDownCliente" @bind="documentoBusqueda" />
-                            </div>
+                                    <button class="btn btn-primary ml-2" type="button" @onclick="(() => ShowNameList())">...</button>
+                                </div>
 
                             @if (clienteSeleccionado != null)
                             {
@@ -219,7 +282,7 @@
                 ven = JsonConvert.DeserializeObject<VentaViewDTO>(content);
 
                 // Ahora puedes trabajar con el objeto deserializado
-            // ...
+                // ...
             }
             if (ven.Id != 0)
                 navigation.NavigateTo($"/comprobante/imprimir/{ven.Id}");
@@ -239,7 +302,7 @@
         }
 
         documentoBusqueda = "";
-        await runtime.InvokeVoidAsync("eval", "document.getElementById('codigoBarrasInput').focus();");
+        await js.InvokeVoidAsync("eval", "document.getElementById('codigoBarrasInput').focus();");
     }
 
     // Clase CreateDetalleVentaDTO
@@ -436,7 +499,7 @@
         // Ejemplo de asignación de valores
 
 
-        await runtime.InvokeVoidAsync("eval", "document.getElementById('codigoBarrasInput').focus();");
+        await js.InvokeVoidAsync("eval", "document.getElementById('codigoBarrasInput').focus();");
     }
 
     // Método para sumar la cantidad
@@ -499,7 +562,7 @@
     // Función para mostrar alertas de error
     private async Task ShowError(string mensaje, string titulo)
     {
-        await new Utils.Functions(runtime, swal).ShowError(mensaje, titulo);
+        await new Utils.Functions(js, swl).ShowError(mensaje, titulo);
     }
 
 
@@ -522,11 +585,91 @@
         }
         catch (Exception)
         {
-            
-            
-        }
-       
 
+
+        }
+
+
+    }
+
+
+    //Modal code
+
+    private Components.Modals.ConfirmationModal confirmationModal;
+    ClienteViewDTO[] Clientes { get; set; }
+
+
+    string txt = "";
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await LoadCliente();
+        }
+        catch (Exception)
+        {
+
+
+        }
+
+    }
+    async Task LoadCliente()
+    {
+        Clientes = await http.GetFromJsonAsync<ClienteViewDTO[]>($"{SharedProject.Api.url}/Clientes");
+    }
+    async Task Delete(int id)
+    {
+        var Cliente = Clientes.FirstOrDefault(x => x.Id == id);
+        if (await new Utils.Functions(js, swl).ShowConfirmation("Deseas eliminar el registro?", "Confirmar"))
+        {
+            var response = await http.DeleteAsync($"{SharedProject.Api.url}/Clientes/{id}");
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                await LoadCliente();
+            else
+                await new Utils.Functions(js, swl).ShowError("No fue posible eliminar el registro", "Error");
+
+        }
+
+    }
+
+    private async void SearchKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await Buscar(txt);
+        }
+    }
+
+    async Task Buscar(string txt)
+    {
+        if (string.IsNullOrEmpty(txt) || string.IsNullOrWhiteSpace(txt))
+            await LoadCliente();
+        else
+        {
+            var a = await http.GetFromJsonAsync<IEnumerable<ClienteViewDTO>>($"{SharedProject.Api.url}/Clientes/filter/{txt}");
+            Clientes = a.ToArray();
+        }
+
+    }
+
+    private bool showModal = false;
+    private string[] names = { "Nombre 1", "Nombre 2", "Nombre 3" };
+
+    private void ShowNameList()
+    {
+        showModal = true;
+    }
+
+    private void HideModal()
+    {
+        showModal = false;
+    }
+
+    private async Task SelectName(ClienteViewDTO cliente)
+    {
+        clienteSeleccionado = cliente;
+        showModal = false;
+        await Task.CompletedTask;
     }
 }
 

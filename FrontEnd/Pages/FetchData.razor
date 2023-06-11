@@ -1,57 +1,158 @@
 ﻿@page "/fetchdata"
-@inject HttpClient Http
+@inject HttpClient http
+@inject IJSRuntime js
+@using Microsoft.AspNetCore.Components.Forms
+@inject SweetAlertService swl;
 
-<PageTitle>Weather forecast</PageTitle>
+<div style="display: @(showModal ? "block" : "none"); position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.4);">
+    <div style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h5 style="margin: 0;">Lista de Nombres</h5>
+            <button type="button" style="background: none; border: none; cursor: pointer; font-size: 24px; font-weight: bold; color: #000;" @onclick="HideModal">&times;</button>
+        </div>
+        <div>
+            <h3>Proveedor</h3>
 
-<h1>Weather forecast</h1>
+            <div class="input-group my-2 align-items-center">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" style="margin-right: 5px;"><i class="fas fa-search"></i></span>
+                </div>
+                <input type="text" class="form-contProveedor px-2" placeholder="Buscar" @bind="txt" />
+                <div class="input-group-append" style="margin-left: 5px;">
+                    <button class="btn btn-primary ml-2" type="button" @onclick="(() => Buscar(txt))">Buscar</button>
+                </div>
+            </div>
 
-<p>This component demonstrates fetching data from the server.</p>
-
-@if (forecasts == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
+            @if (Proveedores == null)
             {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
+                <text>Cargando...</text>
             }
-        </tbody>
-    </table>
-}
+            else if (Proveedores.Length == 0)
+            {
+                <text>No hay categorías en la base de datos.</text>
+            }
+            else
+            {
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th hidden>Id</th>
+                            <th>Nombre</th>
+                            <th>Documento</th>
+                            <th>Tipo de Documento</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var Proveedor in Proveedores)
+                        {
+                            <tr>
+                                <td hidden>@Proveedor.Id</td>
+                                <td>@Proveedor.DatosGenerales.Nombre</td>
+                                <td>@Proveedor.DatosGenerales.NumeroDocumento</td>
+                                <td>@Proveedor.DatosGenerales.Documento.Descripcion</td>
+                                <td>
+                                    <button class="btn btn-success" type="button" @onclick="(() => SelectName(Proveedor))">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-danger" @onclick="(() => Delete(Proveedor.Id))">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
 
 @code {
-    private WeatherForecast[]? forecasts;
 
+    private Components.Modals.ConfirmationModal confirmationModal;
+    ProveedorViewDTO[] Proveedores { get; set; }
+    ProveedorViewDTO p = new ProveedorViewDTO();
+
+    string txt = "";
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
+        try
+        {
+            
+        }
+        catch (Exception)
+        {
+
+
+        }
+    }
+    async Task LoadProveedor()
+    {
+        Proveedores = await http.GetFromJsonAsync<ProveedorViewDTO[]>($"{SharedProject.Api.url}/Proveedor");
+    }
+    async Task Delete(int id)
+    {
+        var Proveedor = Proveedores.FirstOrDefault(x => x.Id == id);
+        if (await new Utils.Functions(js, swl).ShowConfirmation("Deseas eliminar el registro?", "Confirmar"))
+        {
+            var response = await http.DeleteAsync($"{SharedProject.Api.url}/Proveedor/{id}");
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                await LoadProveedor();
+            else
+                await new Utils.Functions(js, swl).ShowError("No fue posible eliminar el registro", "Error");
+
+        }
+
     }
 
-    public class WeatherForecast
+    private async void SearchKeyPress(KeyboardEventArgs e)
     {
-        public DateTime Date { get; set; }
+        if (e.Key == "Enter")
+        {
+            await Buscar(txt);
+        }
+    }
 
-        public int TemperatureC { get; set; }
+    async Task Buscar(string txt)
+    {
+        if (string.IsNullOrEmpty(txt) || string.IsNullOrWhiteSpace(txt))
+            await LoadProveedor();
+        else
+        {
+            var a = await http.GetFromJsonAsync<IEnumerable<ProveedorViewDTO>>($"{SharedProject.Api.url}/Proveedor/filter/{txt}");
+            Proveedores = a.ToArray();
+        }
 
-        public string? Summary { get; set; }
+    }
 
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+
+
+
+
+    private bool showModal = false;
+    private FormData formData = new FormData();
+    private List<string> names = new List<string> { "Nombre 1", "Nombre 2", "Nombre 3", "Nombre 4" };
+
+    private class FormData
+    {
+        public string SelectedName { get; set; }
+    }
+
+    private async void ShowNameList()
+    {
+        showModal = true;
+        await LoadProveedor();
+    }
+
+    private void HideModal()
+    {
+        showModal = false;
+    }
+
+    private void SelectName(ProveedorViewDTO proveedor)
+    {
+         p= proveedor;
+        showModal = false;
     }
 }
