@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" GroupingSetting="Access">
+  <Class Name="SharedProject.Models.Categoria">
+    <Position X="7.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\Categoria.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SharedProject.Models.Producto">
+    <Position X="8.75" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAgAQAAAAIFAAAAAAAAAAAAAQAAEEA=</HashCode>
+      <FileName>Models\Producto.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Categoria" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SharedProject.Models.KardexProducto">
+    <Position X="11.5" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>BAASAAAAEAAACIEARBAAAAJEAAACAAAAAAAAAAAAACQ=</HashCode>
+      <FileName>Models\KardexProducto.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Producto" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SharedProject.Models.Venta">
+    <Position X="3.5" Y="3" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAASAAAAAICAAAEAABCAAAJAQgAAABAAAAAAAAAgAAg=</HashCode>
+      <FileName>Models\Venta.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Cliente" />
+      <Property Name="Comprobante" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SharedProject.Models.DetalleVenta">
+    <Position X="6.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAQEAAJAAABAARQAAAAAFAAAAAAAAAAACAAAAEAA=</HashCode>
+      <FileName>Models\DetalleVenta.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Venta" />
+      <Property Name="Producto" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SharedProject.Models.DetalleCompra">
+    <Position X="12.75" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAiAAEAAJAAAAAARQAAAAABAAAAAAAAAAAEAAAAAAA=</HashCode>
+      <FileName>Models\DetalleCompra.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Compra" />
+      <Property Name="Producto" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SharedProject.Models.Compra">
+    <Position X="9.25" Y="5.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAIAAAIEAAAAAAABBAAAAAAAAAAAAAAAAIAg=</HashCode>
+      <FileName>Models\Compra.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Proveedor" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SharedProject.Models.Cliente">
+    <Position X="3.25" Y="7" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAgAAAAAAAAAAgAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\Cliente.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="DatosGenerales" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SharedProject.Models.DatosGenerales">
+    <Position X="5.5" Y="7.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAACAAAAAAACgAgAAAAAAAAAACAAAAAgAAAAw=</HashCode>
+      <FileName>Models\DatosGenerales.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Documento" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SharedProject.Models.Proveedor">
+    <Position X="8.5" Y="8.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAgAAAAAAAAAAgAAAAAAAACAAAAAAAAAA=</HashCode>
+      <FileName>Models\Proveedor.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="DatosGenerales" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SharedProject.Models.Documento">
+    <Position X="6.25" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACACAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAg=</HashCode>
+      <FileName>Models\Documento.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SharedProject.Models.Empresa">
+    <Position X="3.25" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAAAAAAAAACAAgAAAAAAAAAABAAAAAgAAAAI=</HashCode>
+      <FileName>Models\Empresa.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SharedProject.Models.Rol">
+    <Position X="0.5" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\Rol.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SharedProject.Models.Usuario">
+    <Position X="3" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAgAAAAAAAAAAgAAAAAgACAAAQAAAAABA=</HashCode>
+      <FileName>Models\Usuario.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="DatosGenerales" />
+      <Property Name="Rol" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SharedProject.Models.NumeracionComprobante">
+    <Position X="0.5" Y="3.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAISgAAAAACAAAAAAAAAAAIJAAAAAAAEAAAAAAAAEAg=</HashCode>
+      <FileName>Models\NumeracionComprobante.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

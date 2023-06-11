@@ -121,6 +121,8 @@ namespace Backend.Repositories
                 if (action == 0)
                 {
                     await _context.Productos.AddAsync(producto);
+
+                    await _context.SaveChangesAsync();
                     kardex.ProductoId = producto.Id;
                     await _context.KardexProductos.AddAsync(kardex);
                     await _context.SaveChangesAsync();

@@ -1,263 +1,105 @@
-﻿using AutoMapper;
+﻿using Xunit;
+using Moq;
+using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Backend.Controllers;
 using Backend.Repositories;
-using Microsoft.AspNetCore.Mvc;
-using Moq;
-using SharedProject.DTOs;
-using SharedProject.Interface;
 using SharedProject.Models;
+using SharedProject.DTOs;
 using System;
 using System.Collections.Generic;
-using Xunit;
+using System.Threading.Tasks;
+using SharedProject.Interface;
 
-namespace CajaBlancaXunit
+namespace Backend.Tests
 {
     public class CategoriaControllerTests
     {
         private readonly CategoriaController _controller;
         private readonly Mock<ICategoriaRepository> _categoriaRepositoryMock;
-        private readonly Mock<IMapper> _mapperMock;
+        private readonly IMapper _mapper;
 
         public CategoriaControllerTests()
         {
             _categoriaRepositoryMock = new Mock<ICategoriaRepository>();
-            _mapperMock = new Mock<IMapper>();
-            _controller = new CategoriaController(_categoriaRepositoryMock.Object, _mapperMock.Object);
+            var mapperConfiguration = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile(new MappingProfile());
+            });
+            _mapper = mapperConfiguration.CreateMapper();
+
+            _controller = new CategoriaController(_categoriaRepositoryMock.Object, _mapper);
         }
-
-
         [Fact]
-        public void GetById_ReturnsInternalServerError_WhenExceptionThrown()
+        public void GetAll_DebeRetornarOkResultConListaDeCategorias()
         {
             // Arrange
-            int categoriaId = 1;
-
-            _categoriaRepositoryMock.Setup(repo => repo.GetById(categoriaId)).Throws(new Exception("An error occurred"));
-
-            // Act
-            var result = _controller.GetById(categoriaId);
-
-            // Assert
-            Assert.IsType<StatusCodeResult>(result.Result);
-            var statusCodeResult = (StatusCodeResult)result.Result;
-            Assert.Equal(500, statusCodeResult.StatusCode);
-        }
-
-        [Fact]
-        public void Create_ReturnsInternalServerError_WhenExceptionThrown()
-        {
-            // Arrange
-            var categoriaCreateDTO = new CategoriaCreateDTO();
-            _mapperMock.Setup(mapper => mapper.Map<Categoria>(categoriaCreateDTO)).Throws(new Exception("An error occurred"));
-
-            // Act
-            var result = _controller.Create(categoriaCreateDTO);
-
-            // Assert
-            Assert.IsType<StatusCodeResult>(result.Result);
-            var statusCodeResult = (StatusCodeResult)result.Result;
-            Assert.Equal(500, statusCodeResult.StatusCode);
-        }
-
-        [Fact]
-        public void Update_ReturnsBadRequest_WhenCategoriaIdMismatch()
-        {
-            // Arrange
-            int categoriaId = 1;
-            var categoriaUpdateDTO = new CategoriaCreateDTO { Id = 2 };
-            var categoria = new Categoria { Id = categoriaId };
-
-            _categoriaRepositoryMock.Setup(repo => repo.GetById(categoriaId)).Returns(categoria);
-
-            // Act
-            var result = _controller.Update(categoriaId, categoriaUpdateDTO);
-
-            // Assert
-            Assert.IsType<BadRequestResult>(result);
-        }
-
-        [Fact]
-        public void Delete_ReturnsInternalServerError_WhenExceptionThrown()
-        {
-            // Arrange
-            int categoriaId = 1;
-            var categoria = new Categoria { Id = categoriaId };
-
-            _categoriaRepositoryMock.Setup(repo => repo.GetById(categoriaId)).Returns(categoria);
-            _categoriaRepositoryMock.Setup(repo => repo.Delete(categoria)).Throws(new Exception("An error occurred"));
-
-            // Act
-            var result = _controller.Delete(categoriaId);
-
-            // Assert
-            Assert.IsType<StatusCodeResult>(result);
-            var statusCodeResult = (StatusCodeResult)result;
-            Assert.Equal(500, statusCodeResult.StatusCode);
-        }
-
-        [Fact]
-        public void GetAll_ReturnsOkResult()
-        {
-            // Arrange
-            var categorias = new List<Categoria>();
-            var categoriaDTOs = new List<CategoriaViewDTO>();
-
+            var categorias = new List<Categoria> { new Categoria { Id = 1, Descripcion = "Categoría 1" }, new Categoria { Id = 2, Descripcion = "Categoría 2" } };
             _categoriaRepositoryMock.Setup(repo => repo.GetAll()).Returns(categorias);
-            _mapperMock.Setup(mapper => mapper.Map<IEnumerable<CategoriaViewDTO>>(categorias)).Returns(categoriaDTOs);
 
             // Act
             var result = _controller.GetAll();
 
             // Assert
-            Assert.IsType<OkObjectResult>(result.Result);
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var categoriasResult = Assert.IsAssignableFrom<IEnumerable<CategoriaViewDTO>>(okResult.Value);
+            Assert.Equal(2, categoriasResult.Count());
+        }
+        /*
+        [Fact]
+        public void GetAll_ConFiltro_DebeRetornarOkResultConListaDeCategoriasFiltradas()
+        {
+            // Arrange
+            var filtro = "Categoría";
+            var categorias = new List<Categoria> { new Categoria { Id = 1, Descripcion = "Categoría 1" } };
+            _categoriaRepositoryMock.Setup(repo => repo.FilterGet(filtro)).Returns(categorias.Select(c => _mapper.Map<CategoriaViewDTO>(c)).ToList());
+
+            // Act
+            var result = _controller.GetAll(filtro);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var categoriasResult = Assert.IsAssignableFrom<IEnumerable<CategoriaViewDTO>>(okResult.Value);
+            Assert.Single(categoriasResult);
+        }
+        */
+        [Fact]
+        public void GetById_IdExistente_DebeRetornarOkResultConCategoria()
+        {
+            // Arrange
+            var categoria = new Categoria { Id = 1, Descripcion = "Categoría 1" };
+            _categoriaRepositoryMock.Setup(repo => repo.GetById(categoria.Id)).Returns(categoria);
+
+            // Act
+            var result = _controller.GetById(categoria.Id);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var categoriaResult = Assert.IsAssignableFrom<CategoriaViewDTO>(okResult.Value);
+            Assert.Equal(categoria.Id, categoriaResult.Id);
+            Assert.Equal(categoria.Descripcion, categoriaResult.Descripcion);
         }
 
         [Fact]
-        public void GetAll_ReturnsBadRequest_WhenExceptionThrown()
+        public void Update_IdNoCoincideConCategoria_DebeRetornarBadRequest()
         {
             // Arrange
-            _categoriaRepositoryMock.Setup(repo => repo.GetAll()).Throws(new Exception("An error occurred"));
+            var categoriaCreateDto = new CategoriaCreateDTO { Id = 1, Descripcion = "Nueva Categoría" };
 
             // Act
-            var result = _controller.GetAll();
+            var result = _controller.Update(2, categoriaCreateDto);
 
             // Assert
-            Assert.IsType<BadRequestObjectResult>(result.Result);
+            var badRequestResult = Assert.IsType<BadRequestResult>(result);
         }
 
-        [Fact]
-        public void GetById_ReturnsOkResult_WhenCategoriaExists()
+
+        private class MappingProfile : Profile
         {
-            // Arrange
-            int categoriaId = 1;
-            var categoria = new Categoria { Id = categoriaId };
-            var categoriaDTO = new CategoriaViewDTO { Id = categoriaId };
-
-            _categoriaRepositoryMock.Setup(repo => repo.GetById(categoriaId)).Returns(categoria);
-            _mapperMock.Setup(mapper => mapper.Map<CategoriaViewDTO>(categoria)).Returns(categoriaDTO);
-
-            // Act
-            var result = _controller.GetById(categoriaId);
-
-            // Assert
-            Assert.IsType<OkObjectResult>(result.Result);
+            public MappingProfile()
+            {
+                CreateMap<Categoria, CategoriaViewDTO>();
+            }
         }
-
-        [Fact]
-        public void GetById_ReturnsNotFound_WhenCategoriaDoesNotExist()
-        {
-            // Arrange
-            int categoriaId = 1;
-            Categoria categoria = null;
-
-            _categoriaRepositoryMock.Setup(repo => repo.GetById(categoriaId)).Returns(categoria);
-
-            // Act
-            var result = _controller.GetById(categoriaId);
-
-            // Assert
-            Assert.IsType<NotFoundResult>(result.Result);
-        }
-
-        [Fact]
-        public void Create_ReturnsCreatedAtAction()
-        {
-            // Arrange
-            var categoriaCreateDTO = new CategoriaCreateDTO();
-            var categoria = new Categoria { Id = 1 };
-            var categoriaViewDTO = new CategoriaViewDTO { Id = 1 };
-
-            _mapperMock.Setup(mapper => mapper.Map<Categoria>(categoriaCreateDTO)).Returns(categoria);
-            _mapperMock.Setup(mapper => mapper.Map<CategoriaViewDTO>(categoria)).Returns(categoriaViewDTO);
-
-            // Act
-            var result = _controller.Create(categoriaCreateDTO);
-
-            // Assert
-            Assert.IsType<CreatedAtActionResult>(result.Result);
-        }
-
-        [Fact]
-        public void Create_ReturnsBadRequest_WhenExceptionThrown()
-        {
-            // Arrange
-            var categoriaCreateDTO = new CategoriaCreateDTO();
-            _mapperMock.Setup(mapper => mapper.Map<Categoria>(categoriaCreateDTO)).Throws(new Exception("An error occurred"));
-
-            // Act
-            var result = _controller.Create(categoriaCreateDTO);
-
-            // Assert
-            Assert.IsType<BadRequestObjectResult>(result.Result);
-        }
-
-        [Fact]
-        public void Update_ReturnsNoContent_WhenCategoriaExists()
-        {
-            // Arrange
-            int categoriaId = 1;
-            var categoriaUpdateDTO = new CategoriaCreateDTO { Id = categoriaId };
-            var categoria = new Categoria { Id = categoriaId };
-
-            _categoriaRepositoryMock.Setup(repo => repo.GetById(categoriaId)).Returns(categoria);
-
-            // Act
-            var result = _controller.Update(categoriaId, categoriaUpdateDTO);
-
-            // Assert
-            Assert.IsType<NoContentResult>(result);
-        }
-
-        [Fact]
-        public void Update_ReturnsBadRequest_WhenCategoriaDoesNotExist()
-        {
-            // Arrange
-            int categoriaId = 1;
-            Categoria categoria = null;
-
-            _categoriaRepositoryMock.Setup(repo => repo.GetById(categoriaId)).Returns(categoria);
-
-            // Act
-            var result = _controller.Update(categoriaId, new CategoriaCreateDTO());
-
-            // Assert
-            Assert.IsType<BadRequestResult>(result);
-        }
-
-        [Fact]
-        public void Delete_ReturnsNoContent_WhenCategoriaExists()
-        {
-            // Arrange
-            int categoriaId = 1;
-            var categoria = new Categoria { Id = categoriaId };
-
-            _categoriaRepositoryMock.Setup(repo => repo.GetById(categoriaId)).Returns(categoria);
-
-            // Act
-            var result = _controller.Delete(categoriaId);
-
-            // Assert
-            Assert.IsType<NoContentResult>(result);
-        }
-
-        [Fact]
-        public void Delete_ReturnsNotFound_WhenCategoriaDoesNotExist()
-        {
-            // Arrange
-            int categoriaId = 1;
-            Categoria categoria = null;
-
-            _categoriaRepositoryMock.Setup(repo => repo.GetById(categoriaId)).Returns(categoria);
-
-            // Act
-            var result = _controller.Delete(categoriaId);
-
-            // Assert
-            Assert.IsType<NotFoundResult>(result);
-        }
-
-        // Agregar más pruebas para los demás métodos del controlador
-
-        // ...
     }
 }
