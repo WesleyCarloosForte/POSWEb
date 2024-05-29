@@ -14,20 +14,20 @@
                 <label style="font-weight: bold;">Proveedor: </label> @Proveedor.DatosGenerales.Nombre<br>
                 <label>Direccion: </label> @Proveedor.DatosGenerales.Direccion<br>
             </div>
-            <div style="margin-top: 10px; max-width: 48mm;">
+            <div style="margin-top: 10px; max-width: 50mm;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                    <div style="width: 35%; text-align: left; font-weight: bold;">Item</div>
-                    <div style="width: 20%; text-align: center; font-weight: bold;">Cant</div>
-                    <div style="width: 25%; text-align: center; font-weight: bold;">Unit</div>
-                    <div style="width: 20%; text-align: center; font-weight: bold;">Tot</div>
+                    <div style="width: 35%; text-align: left; font-size:x-small font-weight: bold;">Item</div>
+                    <div style="width: 20%; text-align: center; font-size:x-small font-weight: bold;">Cant</div>
+                    <div style="width: 25%; text-align: center;font-size:x-small font-weight: bold;">Unit</div>
+                    <div style="width: 20%; text-align: center;font-size:x-small font-weight: bold;">Tot</div>
                 </div>
                 @foreach (var detalle in Compra.DetalleCompra)
                 {
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px; max-width: 48mm; ">
-                        <div style="width: 60%; text-align: left; max-width: 48mm; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@detalle.Producto</div>
-                        <div style="width: 10%; text-align: center;">@detalle.Cantidad.ToString("N0")</div>
-                        <div style="width: 15%; text-align: center;">@detalle.PrecioCompraUnitario.ToString("N0")</div>
-                        <div style="width: 15%; text-align: center;">@detalle.TotalCompra.ToString("N0")</div>
+                    <div style="display: flex;  margin-bottom: 5px; max-width: 50mm; ">
+                        <div style="width: 100%; text-align: left; font-size:x-small max-width: 50mm; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@detalle.Producto</div>
+                       <br />
+                        <div style="width: 70%; text-align: left; font-size:x-small">@detalle.Cantidad.ToString("N0") X @detalle.PrecioCompraUnitario.ToString("N0")</div>
+                        <div style="width: 30%; text-align: left; font-size:x-small">@detalle.TotalCompra.ToString("N0")</div>
                     </div>
                 }
                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px; max-width: 48mm; border-top-width:1px;  border: dashed; border-color:black;"></div>

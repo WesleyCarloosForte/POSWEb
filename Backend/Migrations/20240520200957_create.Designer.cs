@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230606021606_createKardex2")]
-    partial class createKardex2
+    [Migration("20240520200957_create")]
+    partial class create
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -247,8 +247,14 @@ namespace Backend.Migrations
                     b.Property<decimal>("GananciaEsperada")
                         .HasColumnType("decimal(65,30)");
 
+                    b.Property<decimal>("GananciaUnitaria")
+                        .HasColumnType("decimal(65,30)");
+
                     b.Property<string>("NumeroComprobante")
                         .HasColumnType("longtext");
+
+                    b.Property<decimal>("PrecioUnitario")
+                        .HasColumnType("decimal(65,30)");
 
                     b.Property<int>("ProductoId")
                         .HasColumnType("int");

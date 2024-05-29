@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Backend.Migrations
 {
     /// <inheritdoc />
-    public partial class create2 : Migration
+    public partial class create : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -98,12 +98,12 @@ namespace Backend.Migrations
                     CategoriaId = table.Column<int>(type: "int", nullable: false),
                     CodigoBarras = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    StockActual = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
-                    StockMinimo = table.Column<decimal>(type: "decimal(65,30)", nullable: true),
+                    StockActual = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    StockMinimo = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     Descripcion = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    PrecioCompra = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
-                    PrecioVenta = table.Column<decimal>(type: "decimal(65,30)", nullable: false)
+                    PrecioCompra = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PrecioVenta = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -113,7 +113,7 @@ namespace Backend.Migrations
                         column: x => x.CategoriaId,
                         principalTable: "Categorias",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -148,6 +148,43 @@ namespace Backend.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "KardexProductos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Descripcioin = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Tipo = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ProductoId = table.Column<int>(type: "int", nullable: false),
+                    stockAnterior = table.Column<int>(type: "int", nullable: false),
+                    stockActual = table.Column<int>(type: "int", nullable: false),
+                    Valor = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    GananciaUnitaria = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    PrecioUnitario = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    ValorCompra = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    GananciaEsperada = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    TipoComprobante = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    NumeroComprobante = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CantidadMovimiento = table.Column<int>(type: "int", nullable: false),
+                    Fecha = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_KardexProductos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_KardexProductos_Productos_ProductoId",
+                        column: x => x.ProductoId,
+                        principalTable: "Productos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Clientes",
                 columns: table => new
                 {
@@ -163,7 +200,7 @@ namespace Backend.Migrations
                         column: x => x.DatosGeneralesId,
                         principalTable: "DatosGenerales",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -183,7 +220,7 @@ namespace Backend.Migrations
                         column: x => x.DatosGeneralesId,
                         principalTable: "DatosGenerales",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -208,7 +245,7 @@ namespace Backend.Migrations
                         column: x => x.DatosGeneralesId,
                         principalTable: "DatosGenerales",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Usuarios_Roles_RolId",
                         column: x => x.RolId,
@@ -226,6 +263,8 @@ namespace Backend.Migrations
                     ClienteId = table.Column<int>(type: "int", nullable: true),
                     ComprobanteId = table.Column<int>(type: "int", nullable: true),
                     Fecha = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    FechaInicio = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    FechaFin = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     NumeroComprobante = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Timbrado = table.Column<string>(type: "longtext", nullable: true)
@@ -234,7 +273,7 @@ namespace Backend.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     PuntoExpedicion = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    TotalCompra = table.Column<decimal>(type: "decimal(65,30)", nullable: true),
+                    TotalCompra = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     Estado = table.Column<bool>(type: "tinyint(1)", nullable: true)
                 },
                 constraints: table =>
@@ -264,7 +303,7 @@ namespace Backend.Migrations
                     Fecha = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     NumeroComprobante = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    TotalCompra = table.Column<decimal>(type: "decimal(65,30)", nullable: true),
+                    TotalCompra = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     Estado = table.Column<bool>(type: "tinyint(1)", nullable: true)
                 },
                 constraints: table =>
@@ -291,12 +330,12 @@ namespace Backend.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CodigoBarras = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    PrecioVenta = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
-                    PrecioCompra = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
-                    Cantidad = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
-                    Descuento = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
-                    TotalVenta = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
-                    TotalCompra = table.Column<decimal>(type: "decimal(65,30)", nullable: false)
+                    PrecioVenta = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PrecioCompra = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Cantidad = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Descuento = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalVenta = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalCompra = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -328,9 +367,9 @@ namespace Backend.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CodigoBarras = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    PrecioCompraUnitario = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
-                    Cantidad = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
-                    TotalCompra = table.Column<decimal>(type: "decimal(65,30)", nullable: false)
+                    PrecioCompraUnitario = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Cantidad = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalCompra = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -386,6 +425,11 @@ namespace Backend.Migrations
                 column: "VentaId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_KardexProductos_ProductoId",
+                table: "KardexProductos",
+                column: "ProductoId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Productos_CategoriaId",
                 table: "Productos",
                 column: "CategoriaId");
@@ -426,16 +470,19 @@ namespace Backend.Migrations
                 name: "DetalleVentas");
 
             migrationBuilder.DropTable(
+                name: "KardexProductos");
+
+            migrationBuilder.DropTable(
                 name: "Usuarios");
 
             migrationBuilder.DropTable(
                 name: "Compras");
 
             migrationBuilder.DropTable(
-                name: "Productos");
+                name: "Ventas");
 
             migrationBuilder.DropTable(
-                name: "Ventas");
+                name: "Productos");
 
             migrationBuilder.DropTable(
                 name: "Roles");
@@ -444,13 +491,13 @@ namespace Backend.Migrations
                 name: "Proveedores");
 
             migrationBuilder.DropTable(
-                name: "Categorias");
-
-            migrationBuilder.DropTable(
                 name: "Clientes");
 
             migrationBuilder.DropTable(
                 name: "NumeracionComprobantes");
+
+            migrationBuilder.DropTable(
+                name: "Categorias");
 
             migrationBuilder.DropTable(
                 name: "DatosGenerales");

@@ -39,10 +39,11 @@
                 @foreach (var item in Venta.DetallesVenta)
                 {
                     <div style="display: flex; justify-content: space-between; margin-bottom: 5px; max-width: 48mm; ">
-                        <div style="width: 60%; text-align: left; max-width: 48mm; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@item.Producto</div>
-                        <div style="width: 10%; text-align: center;">@item.Cantidad.ToString("N0")</div>
-                        <div style="width: 15%; text-align: center;">@item.PrecioVenta.ToString("N0")</div>
-                        <div style="width: 15%; text-align: center;">@item.TotalVenta.ToString("N0")</div>
+                        <div style="width: 100%; text-align: left; font-size:x-small max-width: 48mm; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@item.Producto</div>
+                        <br />
+
+                        <div style="width: 75%; text-align: left; font-size:x-small">@item.Cantidad.ToString("N0") X @item.PrecioVenta.ToString("N0")</div>
+                        <div style="width: 15%; text-align: left; font-size:x-small">@item.TotalVenta.ToString("N0")</div>
                     </div>
                 }
                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px; max-width: 48mm; border-top-width:1px;  border: dashed; border-color:black;"></div>
